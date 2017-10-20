@@ -21,10 +21,20 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         protected const string ContainerRegistryNoun = "AzureRmContainerRegistry";
         protected const string ContainerRegistryCredentialNoun = ContainerRegistryNoun + "Credential";
         protected const string ContainerRegistryNameAvailabilityNoun = "AzureRmContainerRegistryNameAvailability";
+        protected const string ContainerRegistryReplicationNoun = "AzureRmContainerRegistryReplication";
+        protected const string ContainerRegistryWebhookNoun = "AzureRmContainerRegistryWebhook";
 
         protected const string ContainerRegistryNameAlias = "ContainerRegistryName";
         protected const string RegistryNameAlias = "RegistryName";
         protected const string ResourceNameAlias = "ResourceName";
+        protected const string ReplicationNameAlias = "ReplicationName";
+        protected const string ReplicationLocationAlias = "ReplicationLocation";
+
+        protected const string WebhookNameAlias = "WebhookName";
+        protected const string WebhookActionsAlias = "WebhookActions";
+        protected const string WebhookUriAlias = "WebhookUri";
+        protected const string WebhookHeadersAlias = "WebhookHeaders";
+        protected const string WebhookTagsAlias = "WebhookTags";
 
         protected const string ContainerRegistrySkuAlias = "ContainerRegistrySku";
         protected const string RegistrySkuAlias = "RegistrySku";
@@ -42,6 +52,14 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         protected const string RegistryObjectParameterSet = "RegistryObjectParameterSet";
         protected const string EnableAdminUserParameterSet = "EnableAdminUserParameterSet";
         protected const string DisableAdminUserParameterSet = "DisableAdminUserParameterSet";
+        protected const string ListWebhookByNameResourceGroupParameterSet = "ListWebhookByNameResourceGroupParameterSet";
+        protected const string ListWebhookByRegistryObjectParameterSet = "ListWebhookByRegistryObjectParameterSet";
+        protected const string ShowWebhookByNameResourceGroupParameterSet = "ShowWebhookByNameResourceGroupParameterSet";
+        protected const string ShowWebhookByRegistryObjectParameterSet = "ShowWebhookByRegistryObjectParameterSet";
+        protected const string GetWebhookConfigByNameResourceGroupParameterSet = "GetWebhookConfigByNameResourceGroupParameterSet";
+        protected const string GetWebhookConfigByRegistryObjectParameterSet = "GetWebhookConfigByRegistryObjectParameterSet";
+        protected const string ListWebhookEventsByNameResourceGroupParameterSet = "ListWebhookEventsByNameResourceGroupParameterSet";
+        protected const string ListWebhookEventsByRegistryObjectParameterSet = "ListWebhookEventsByRegistryObjectParameterSet";
 
         protected struct PasswordNameStrings
         {

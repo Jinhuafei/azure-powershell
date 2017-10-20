@@ -63,17 +63,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\GetAzureContainerRegistry.cs" />
+    <Compile Include="Commands\GetAzureContainerRegistryReplication.cs" />
+    <Compile Include="Commands\NewAzureContainerRegistryReplication.cs" />
+    <Compile Include="Commands\RemoveAzureContainerRegistryReplication.cs" />
     <Compile Include="Commands\TestAzureContainerRegistryNameAvailability.cs" />
     <Compile Include="Commands\GetAzureContainerRegistryCredential.cs" />
     <Compile Include="Commands\UpdateAzureContainerRegistry.cs" />
     <Compile Include="Commands\RemoveAzureContainerRegistry.cs" />
     <Compile Include="Commands\NewAzureContainerRegistry.cs" />
     <Compile Include="Commands\UpdateAzureContainerRegistryCredential.cs" />
+    <Compile Include="Commands\UpdateAzureContainerRegistryReplication.cs" />
     <Compile Include="Models\DeploymentTemplate.cs" />
     <Compile Include="Models\PSContainerRegistry.cs" />
     <Compile Include="Models\ContainerRegistryClient.cs" />
     <Compile Include="Models\ContainerRegistryCmdletBase.cs" />
     <Compile Include="Models\PSContainerRegistryCredential.cs" />
+    <Compile Include="Models\PSContainerRegistryReplication.cs" />
     <Compile Include="Models\ResourceManagerClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
