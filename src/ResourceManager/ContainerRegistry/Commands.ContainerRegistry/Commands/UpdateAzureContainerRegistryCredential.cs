@@ -51,8 +51,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            HelpMessage = "The name of password to regenerate. " + AllowedPasswordNames)]
+            HelpMessage = "The name of password to regenerate.")]
         [ValidateNotNullOrEmpty]
+        [ValidateSet("password", "password2")]
         public PasswordName PasswordName { get; set; }
 
         public override void ExecuteCmdlet()

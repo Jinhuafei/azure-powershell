@@ -15,6 +15,7 @@
 using System.Collections;
 using System.Management.Automation;
 using Microsoft.Azure.Commands.ResourceManager.Common.Tags;
+using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
@@ -77,6 +78,15 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             HelpMessage = "The name of an existing storage account.")]
         public string StorageAccountName { get; set; }
 
+        [Parameter(
+            Position = 2,
+            Mandatory = true,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Container Registry SKU.")]
+        [Alias(ContainerRegistrySkuAlias, RegistrySkuAlias)]
+        [ValidateSet(SkuTier.Classic, SkuTier.Basic, SkuTier.Premium, SkuTier.Standard, IgnoreCase = false)]
+        public string Sku { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (ShouldProcess(Name, "Update Container Registry"))
@@ -98,7 +108,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 }
 
                 var registry = RegistryClient.UpdateRegistry(
-                    ResourceGroupName, Name, adminUserEnabled, StorageAccountName, storageAccountResourceGroup, tags);
+                    ResourceGroupName, Name, adminUserEnabled, Sku, StorageAccountName, storageAccountResourceGroup, tags);
                 WriteObject(new PSContainerRegistry(registry));
             }
         }

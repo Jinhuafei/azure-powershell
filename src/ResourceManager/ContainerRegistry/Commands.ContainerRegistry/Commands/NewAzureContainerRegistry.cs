@@ -47,10 +47,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             Position = 2,
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Container Registry SKU. " + AllowedSkuNames)]
+            HelpMessage = "Container Registry SKU.")]
         [Alias(ContainerRegistrySkuAlias, RegistrySkuAlias)]
-        [ValidateNotNullOrEmpty]
-        [ValidateSet(SkuTier.Basic, IgnoreCase = false)]
+        [ValidateSet(SkuTier.Classic, SkuTier.Basic, SkuTier.Premium, SkuTier.Standard, IgnoreCase = false)]
         public string Sku { get; set; }
 
         [Parameter(
@@ -96,13 +95,29 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                     Location = ResourceManagerClient.GetResourceGroupLocation(ResourceGroupName);
                 }
 
-                DeploymentExtended result = ResourceManagerClient.CreateRegistry(
-                    ResourceGroupName, Name, Location, Sku, EnableAdminUser, StorageAccountName, tags);
-
-                if (result.Properties.ProvisioningState == DeploymentState.Succeeded.ToString())
+                if(string.Equals(Sku, SkuTier.Classic))
                 {
-                    var registry = RegistryClient.GetRegistry(ResourceGroupName, Name);
-                    WriteObject(new PSContainerRegistry(registry));
+                    DeploymentExtended result = ResourceManagerClient.CreateClassicRegistry(
+                        ResourceGroupName, Name, Location, EnableAdminUser, StorageAccountName, tags);
+
+                    if (result.Properties.ProvisioningState == DeploymentState.Succeeded.ToString())
+                    {
+                        var registry = RegistryClient.GetRegistry(ResourceGroupName, Name);
+                        WriteObject(new PSContainerRegistry(registry));
+                    }
+                }
+                else
+                {
+                    var registry = new Registry 
+                    { 
+                        Sku = new Microsoft.Azure.Management.ContainerRegistry.Models.Sku(Sku), 
+                        AdminUserEnabled = EnableAdminUser,
+                        Tags = tags,
+                        Location = Location
+                    };
+
+                    var createdRegistry = RegistryClient.CreateRegistry(ResourceGroupName, Name, registry);
+                    WriteObject(new PSContainerRegistry(createdRegistry));
                 }
             }
         }

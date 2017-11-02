@@ -35,6 +35,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         protected const string WebhookUriAlias = "WebhookUri";
         protected const string WebhookHeadersAlias = "WebhookHeaders";
         protected const string WebhookTagsAlias = "WebhookTags";
+        protected const string WebhookDisabledAlias = "WebhookDisabled";
+        protected const string WebhookScopeAlias = "WebhookScope";
+        protected const string WebhookLocationAlias = "WebhookLocation";
 
         protected const string ContainerRegistrySkuAlias = "ContainerRegistrySku";
         protected const string RegistrySkuAlias = "RegistrySku";
@@ -42,10 +45,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         protected const string TagsAlias = "Tags";
         protected const string EnableAdminAlias = "EnableAdmin";
         protected const string DisableAdminAlias = "DisableAdmin";
-
-        protected const string AllowedSkuNames = "Allowed values: Basic.";
-        protected const string AllowedPasswordNames = "Allowed values: password, password2.";
-
+        
         protected const string ResourceGroupParameterSet = "ResourceGroupParameterSet";
         protected const string RegistryNameParameterSet = "RegistryNameParameterSet";
         protected const string NameResourceGroupParameterSet = "NameResourceGroupParameterSet";
@@ -60,6 +60,10 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         protected const string GetWebhookConfigByRegistryObjectParameterSet = "GetWebhookConfigByRegistryObjectParameterSet";
         protected const string ListWebhookEventsByNameResourceGroupParameterSet = "ListWebhookEventsByNameResourceGroupParameterSet";
         protected const string ListWebhookEventsByRegistryObjectParameterSet = "ListWebhookEventsByRegistryObjectParameterSet";
+        protected const string ShowReplicationByNameResourceGroupParameterSet = "ShowReplicationByNameResourceGroupParameterSet";
+        protected const string ShowReplicationByRegistryObjectParameterSet = "ShowReplicationByRegistryObjectParameterSet";
+        protected const string ListReplicationByNameResourceGroupParameterSet = "ListReplicationByNameResourceGroupParameterSet";
+        protected const string ListReplicationByRegistryObjectParameterSet = "ListReplicationByRegistryObjectParameterSet";
 
         protected struct PasswordNameStrings
         {

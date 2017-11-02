@@ -15,6 +15,8 @@
 using System;
 using System.Collections;
 using System.Management.Automation;
+using Microsoft.Azure.Commands.ResourceManager.Common.Tags;
+using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
@@ -44,7 +46,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             Mandatory = true,
             ParameterSetName = NameResourceGroupParameterSet,
             HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -60,6 +62,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             Mandatory = true,
             HelpMessage = "Space separated list of actions that trigger the webhook to post notifications.")]
         [Alias(WebhookActionsAlias)]
+        [ValidateSet(WebhookAction.Delete, WebhookAction.Push)]
         public string[] Actions { get; set; }
 
         [Parameter(
@@ -72,16 +75,65 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 
         [Parameter(
             Mandatory = false,
-            HelpMessage = "Space separated custom headers in 'key[=value]' format that will be added to the webhook notifications.")]
+            HelpMessage = "Custom headers that will be added to the webhook notifications.")]
         [ValidateNotNull]
         [Alias(WebhookHeadersAlias)]
         public Hashtable Headers { get; set; }
 
         [Parameter(
             Mandatory = false,
-            HelpMessage = "Space separated tags in 'key[=value]' format.")]
+            HelpMessage = "Webhook tags.")]
         [ValidateNotNull]
         [Alias(WebhookTagsAlias)]
         public Hashtable Tag { get; set; }
-     }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Webhook is disabled")]
+        [Alias(WebhookDisabledAlias)]
+        public SwitchParameter Disabled { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Webhook scope.")]
+        [ValidateNotNull]
+        [Alias(WebhookScopeAlias)]
+        public string Scope { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Webhook Location. Default to the location of the resource group.")]
+        [ValidateNotNullOrEmpty]
+        [Alias(WebhookLocationAlias)]
+        public string Location { get; set; }
+
+        public override void ExecuteCmdlet()
+        {
+            if (ShouldProcess(Name, "Create a webhook for the container registry"))
+            {
+                if (string.Equals(ParameterSetName, RegistryObjectParameterSet))
+                {
+                    ResourceGroupName = Registry.ResourceGroupName;
+                    RegistryName = Registry.Name;
+                }
+
+                var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
+                var headers = ConversionUtilities.ToDictionary(Headers);
+
+                var parameters = new WebhookCreateParameters()
+                {
+                    Actions = Actions,
+                    CustomHeaders = headers,
+                    ServiceUri = Uri?.ToString(),
+                    Tags = tags,
+                    Status = ConversionUtilities.ToWebhookStatus(Disabled),
+                    Scope = Scope,
+                    Location = Location ?? ResourceManagerClient.GetResourceGroupLocation(ResourceGroupName)
+                };
+
+                var webhook = RegistryClient.CreateWebhook(ResourceGroupName, RegistryName, Name, parameters);
+                WriteObject(new PSContainerRegistryWebhook(webhook));
+            }
+        }
+    }
 }

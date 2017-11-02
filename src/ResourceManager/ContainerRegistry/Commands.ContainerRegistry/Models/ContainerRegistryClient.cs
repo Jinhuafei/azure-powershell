@@ -20,7 +20,6 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.Storage;
 using Microsoft.Azure.Commands.Common.Authentication;
-using Microsoft.Azure.Commands.Common.Authentication.Models;
 using Microsoft.Azure.Commands.Common.Authentication.Abstractions;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
@@ -45,6 +44,11 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             return _storageClient.StorageAccounts.ListKeys(resourceGroupName, accountName).Keys[0].Value;
         }
 
+        public Registry CreateRegistry(string resourceGroupName, string registryName, Registry registry)
+        {
+            return _client.Registries.Create(resourceGroupName, registryName, registry);
+        }
+
         public Registry GetRegistry(string resourceGroupName, string registryName)
         {
             return _client.Registries.Get(resourceGroupName, registryName);
@@ -54,7 +58,8 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             string resourceGroupName,
             string registryName,
             bool? adminUserEnabled,
-            string storageAccountName = null,
+            string sku = null,
+            string storageAccountId = null,
             string storageAccountResourceGroup = null,
             IDictionary<string, string> tags = null)
         {
@@ -63,19 +68,23 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 AdminUserEnabled = adminUserEnabled
             };
 
-            if (storageAccountName != null)
+            if(sku != null)
+            {
+                parameters.Sku = new Management.ContainerRegistry.Models.Sku(sku);
+            }
+
+            if (storageAccountId != null)
             {
                 if (storageAccountResourceGroup == null)
                 {
                     throw new ArgumentNullException("Storage account resource group cannot be null.");
                 }
 
-                var storageAccountAccessKey = GetStorageAccountAccessKey(storageAccountResourceGroup, storageAccountName);
+                var storageAccountAccessKey = GetStorageAccountAccessKey(storageAccountResourceGroup, storageAccountId);
 
-                parameters.StorageAccount = new StorageAccountParameters()
+                parameters.StorageAccount = new StorageAccountProperties()
                 {
-                    Name = storageAccountName,
-                    AccessKey = storageAccountAccessKey
+                    Id = storageAccountId
                 };
             }
 
@@ -129,6 +138,86 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public RegistryNameStatus CheckRegistryNameAvailability(string registryName)
         {
             return _client.Registries.CheckNameAvailability(registryName);
+        }
+
+        public Replication CreateReplication(string resourceGroupName, string registryName, string replicationName, string location, IDictionary<string, string> tags)
+        {
+            return _client.Replications.Create(resourceGroupName, registryName, replicationName, location, tags);
+        }
+
+        public void DeleteReplication(string resourceGroupName, string registryName, string replicationName)
+        {
+            _client.Replications.Delete(resourceGroupName, registryName, replicationName);
+        }
+        
+        public Replication UpdateReplication(string resourceGroupName, string registryName, string replicationName, IDictionary<string, string> tags)
+        {
+            return _client.Replications.Update(resourceGroupName, registryName, replicationName, tags);
+        }
+
+        public IPage<Replication> ListReplications(string resourceGroupName, string registryName)
+        {
+            return _client.Replications.List(resourceGroupName, registryName);
+        }
+
+        public IPage<Replication> ListReplicationsUsingNextLink(string nextLink)
+        {
+            return _client.Replications.ListNext(nextLink);
+        }
+
+        public Replication GetReplication(string resourceGroupName, string registryName, string replicationName)
+        {
+            return _client.Replications.Get(resourceGroupName, registryName, replicationName);
+        }
+
+        public Webhook CreateWebhook(string resourceGroupName, string registryName, string webhookName, WebhookCreateParameters parameters)
+        {
+            return _client.Webhooks.Create(resourceGroupName, registryName, webhookName, parameters);
+        }
+
+        public Webhook UpdateWebhook(string resourceGroupName, string registryName, string webhookName, WebhookUpdateParameters parameters)
+        {
+            return _client.Webhooks.Update(resourceGroupName, registryName, webhookName, parameters);
+        }
+
+        public void DeleteWebhook(string resourceGroupName, string registryName, string webhookName)
+        {
+            _client.Webhooks.Delete(resourceGroupName, registryName, webhookName);
+        }
+
+        public EventInfo PingWebhook(string resourceGroupName, string registryName, string webhookName)
+        {
+            return _client.Webhooks.Ping(resourceGroupName, registryName, webhookName);
+        }
+
+        public Webhook GetWebhook(string resourceGroupName, string registryName, string webhookName)
+        {
+            return _client.Webhooks.Get(resourceGroupName, registryName, webhookName);
+        }
+
+        public IPage<Webhook> ListWebhooks(string resourceGroupName, string registryName)
+        {
+            return _client.Webhooks.List(resourceGroupName, registryName);
+        }
+
+        public IPage<Webhook> ListWebhooksUsingNextLink(string nextLink)
+        {
+            return _client.Webhooks.ListNext(nextLink);
+        }
+
+        public IPage<EventModel> ListWebhookEvents(string resourceGroupName, string registryName, string webhookName)
+        {
+            return _client.Webhooks.ListEvents(resourceGroupName, registryName, webhookName);
+        }
+
+        public IPage<EventModel> ListWebhookEventsUsingNextLink(string nextLink)
+        {
+            return _client.Webhooks.ListEventsNext(nextLink);
+        }
+        
+        public CallbackConfig GetWebhookGetCallbackConfig(string resourceGroupName, string registryName, string webhookName)
+        {
+            return _client.Webhooks.GetCallbackConfig(resourceGroupName, registryName, webhookName);
         }
     }
 }

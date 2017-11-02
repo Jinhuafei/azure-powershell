@@ -21,6 +21,7 @@ using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Azure.Commands.Common.Authentication.Models;
 using Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkClient;
 using Microsoft.Azure.Commands.Common.Authentication.Abstractions;
+using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
@@ -30,11 +31,10 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         {
         }
 
-        public DeploymentExtended CreateRegistry(
+        public DeploymentExtended CreateClassicRegistry(
             string resourceGroupName,
             string registryName,
             string location,
-            string registrySku,
             bool? adminUserEnabled,
             string storageAccountName = null,
             IDictionary<string, string> tags = null)
@@ -50,14 +50,14 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 storageAccountName += DateTime.UtcNow.ToString("hhmmss");
 
                 template = DeploymentTemplateHelper.DeploymentTemplateNewStorage(
-                    registryName, location, registrySku, storageAccountName, adminUserEnabled);
+                    registryName, location, SkuTier.Basic, storageAccountName, adminUserEnabled);
             }
             else
             {
                 var storageAccountResourceGroup = GetStorageAccountResourceGroup(storageAccountName);
 
                 template = DeploymentTemplateHelper.DeploymentTemplateExistingStorage(
-                    registryName, location, registrySku, storageAccountName, storageAccountResourceGroup, adminUserEnabled);
+                    registryName, location, SkuTier.Basic, storageAccountName, storageAccountResourceGroup, adminUserEnabled);
             }
 
             var deploymentName = $"ContainerRegistry_{registryName}";

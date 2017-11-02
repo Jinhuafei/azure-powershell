@@ -13,10 +13,20 @@
 // ----------------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerRegistry.Models;
+using System.Collections.Generic;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
     public class PSContainerRegistryWebhookConfig
     {
+        public PSContainerRegistryWebhookConfig(CallbackConfig config)
+        {
+            ServiceUri = config?.ServiceUri;
+            CustomHeaders = config?.CustomHeaders;
+        }
+
+        public string ServiceUri { get; set; }
+
+        public IDictionary<string, string> CustomHeaders { get; set; }
     }
 }

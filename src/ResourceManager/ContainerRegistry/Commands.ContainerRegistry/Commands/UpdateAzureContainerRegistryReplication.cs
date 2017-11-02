@@ -12,6 +12,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using Microsoft.Azure.Commands.ResourceManager.Common.Tags;
 using System.Collections;
 using System.Management.Automation;
 
@@ -25,17 +26,25 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Parameter(
             Position = 0,
             Mandatory = true,
+            HelpMessage = "Container Registry Replication Name. Default to the location name.")]
+        [ValidateNotNullOrEmpty]
+        [Alias(ReplicationNameAlias)]
+        public string Name { get; set; }
+
+        [Parameter(
+            Position = 1,
+            Mandatory = true,
             ParameterSetName = NameResourceGroupParameterSet,
             HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
         [Parameter(
-            Position = 1,
+            Position = 2,
             Mandatory = true,
             ParameterSetName = NameResourceGroupParameterSet,
             HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -47,5 +56,27 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
 
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "Container Registry Tags.")]
+        [ValidateNotNull]
+        [Alias(TagsAlias)]
+        public Hashtable Tag { get; set; }
+
+        public override void ExecuteCmdlet()
+        {
+            if (ShouldProcess(Name, "Update the replication for the container registry"))
+            {
+                if(string.Equals(ParameterSetName, RegistryObjectParameterSet))
+                {
+                    ResourceGroupName = Registry.ResourceGroupName;
+                    RegistryName = Registry.Name;
+                }
+                var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
+
+                var replication = RegistryClient.UpdateReplication(ResourceGroupName, RegistryName, Name, tags);
+                WriteObject(new PSContainerRegistryReplication(replication));
+            }
+        }
     }
 }

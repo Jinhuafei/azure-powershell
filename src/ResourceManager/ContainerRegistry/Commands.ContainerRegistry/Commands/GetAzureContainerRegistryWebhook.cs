@@ -12,12 +12,14 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsCommon.Get, ContainerRegistryWebhookNoun, DefaultParameterSetName = NameResourceGroupParameterSet)]
-    [OutputType(typeof(PSContainerRegistryWebhook), typeof(PSContainerRegistryWebhookConfig), typeof(PSContainerRegistryWebhookEvents))]
+    [Cmdlet(VerbsCommon.Get, ContainerRegistryWebhookNoun, DefaultParameterSetName = ListWebhookByNameResourceGroupParameterSet)]
+    [OutputType(typeof(PSContainerRegistryWebhook), typeof(PSContainerRegistryWebhookConfig), typeof(PSContainerRegistryWebhookEvent),
+        typeof(IList<PSContainerRegistryWebhook>), typeof(IList<PSContainerRegistryWebhookEvent>))]
     public class GetAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
         [Parameter(Position = 0, Mandatory = true, ParameterSetName = ShowWebhookByNameResourceGroupParameterSet, HelpMessage = "Webhook Name.")]
@@ -41,7 +43,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Parameter(ParameterSetName = ShowWebhookByNameResourceGroupParameterSet)]
         [Parameter(ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet)]
         [Parameter(ParameterSetName = ListWebhookEventsByNameResourceGroupParameterSet)]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -51,6 +53,10 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Parameter(ParameterSetName = ListWebhookEventsByRegistryObjectParameterSet)]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = ListWebhookByNameResourceGroupParameterSet, HelpMessage = "List all of the webhooks for a container registry.")]
+        [Parameter(Mandatory = true, ParameterSetName = ListWebhookByRegistryObjectParameterSet)]
+        public SwitchParameter List { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet, HelpMessage = "Get the configuration information for a webhook.")]
         [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByRegistryObjectParameterSet)]
@@ -62,6 +68,91 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 
         public override void ExecuteCmdlet()
         {
+            if(string.Equals(ParameterSetName, ListWebhookByRegistryObjectParameterSet) ||
+                string.Equals(ParameterSetName, ShowWebhookByRegistryObjectParameterSet) ||
+                string.Equals(ParameterSetName, GetWebhookConfigByRegistryObjectParameterSet) ||
+                string.Equals(ParameterSetName, ListWebhookEventsByRegistryObjectParameterSet))
+            {
+                ResourceGroupName = Registry.ResourceGroupName;
+                RegistryName = Registry.Name;
+            }
+
+            switch (ParameterSetName)
+            {
+                case ShowWebhookByNameResourceGroupParameterSet:
+                case ShowWebhookByRegistryObjectParameterSet:
+                    ShowWebhook();
+                    break;
+                case GetWebhookConfigByNameResourceGroupParameterSet:
+                case GetWebhookConfigByRegistryObjectParameterSet:
+                    GetWebhookConfig();
+                    break;
+                case ListWebhookEventsByNameResourceGroupParameterSet:
+                case ListWebhookEventsByRegistryObjectParameterSet:
+                    ListWebhookEvents();
+                    break;
+                case ListWebhookByNameResourceGroupParameterSet:
+                case ListWebhookByRegistryObjectParameterSet:
+                    ListWebhook();
+                    break;
+            }
+        }
+
+        private void ShowWebhook()
+        {
+            var webhook = RegistryClient.GetWebhook(ResourceGroupName, RegistryName, Name);
+            WriteObject(new PSContainerRegistryWebhook(webhook));
+        }
+
+        private void GetWebhookConfig()
+        {
+            var config = RegistryClient.GetWebhookGetCallbackConfig(ResourceGroupName, RegistryName, Name);
+            WriteObject(new PSContainerRegistryWebhookConfig(config));
+        }
+
+        private void ListWebhookEvents()
+        {
+            var webhookEvents = RegistryClient.ListWebhookEvents(ResourceGroupName, RegistryName, Name);
+            var webhookEventList = new List<PSContainerRegistryWebhookEvent>();
+
+            foreach(var webhookEvent in webhookEvents)
+            {
+                webhookEventList.Add(new PSContainerRegistryWebhookEvent(webhookEvent));
+            }
+
+            while(!string.IsNullOrEmpty(webhookEvents.NextPageLink))
+            {
+                webhookEvents = RegistryClient.ListWebhookEventsUsingNextLink(webhookEvents.NextPageLink);
+                foreach (var webhookEvent in webhookEvents)
+                {
+                    webhookEventList.Add(new PSContainerRegistryWebhookEvent(webhookEvent));
+                }
+            }
+
+            WriteObject(webhookEventList);
+        }
+
+        private void ListWebhook()
+        {
+            var webhooks = RegistryClient.ListWebhooks(ResourceGroupName, RegistryName);
+            var webhookList = new List<PSContainerRegistryWebhook>();
+
+            foreach(var webhook in webhooks)
+            {
+                webhookList.Add(new PSContainerRegistryWebhook(webhook));
+            }
+
+            while(!string.IsNullOrEmpty(webhooks.NextPageLink))
+            {
+                webhooks = RegistryClient.ListWebhooksUsingNextLink(webhooks.NextPageLink);
+
+                foreach (var webhook in webhooks)
+                {
+                    webhookList.Add(new PSContainerRegistryWebhook(webhook));
+                }
+            }
+
+            WriteObject(webhookList);
         }
     }
 }

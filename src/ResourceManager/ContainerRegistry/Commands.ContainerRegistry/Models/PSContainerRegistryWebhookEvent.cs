@@ -16,7 +16,19 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    class PSContainerRegistryWebhookEvents
+    public class PSContainerRegistryWebhookEvent
     {
+        public PSContainerRegistryWebhookEvent(EventModel webhookEvent)
+        {
+            Id = webhookEvent?.Id;
+            EventRequestMessage = webhookEvent?.EventRequestMessage;
+            EventResponseMessage = webhookEvent?.EventResponseMessage;
+        }
+
+        public string Id { get; set; }
+
+        public EventRequestMessage EventRequestMessage { get; set; }
+
+        public EventResponseMessage EventResponseMessage { get; set; }
     }
 }

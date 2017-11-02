@@ -12,6 +12,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using Microsoft.Azure.Commands.ResourceManager.Common.Tags;
 using System.Collections;
 using System.Management.Automation;
 
@@ -35,7 +36,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             Mandatory = true,
             ParameterSetName = NameResourceGroupParameterSet,
             HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -67,5 +68,21 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNull]
         [Alias(TagsAlias)]
         public Hashtable Tag { get; set; }
+
+        public override void ExecuteCmdlet()
+        {
+            if (ShouldProcess(Name, "Create a replication for the container registry"))
+            {
+                if(string.Equals(ParameterSetName, RegistryObjectParameterSet))
+                {
+                    ResourceGroupName = Registry.ResourceGroupName;
+                    RegistryName = Registry.Name;
+                }
+                var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
+
+                var replication = RegistryClient.CreateReplication(ResourceGroupName, RegistryName, Name, Location, tags);
+                WriteObject(new PSContainerRegistryReplication(replication));
+            }
+        }
     }
 }

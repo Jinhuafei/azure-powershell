@@ -30,11 +30,11 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string ResourceGroupName { get; set; }
 
         [Parameter(
-            Position = 2
+            Position = 2,
             Mandatory = true,
             ParameterSetName = NameResourceGroupParameterSet,
             HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -45,5 +45,19 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             HelpMessage = "Container Registry Object.")]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
+
+        public override void ExecuteCmdlet()
+        {
+            if (ShouldProcess(Name, "Delete the replication from the container registry"))
+            {
+                if(string.Equals(ParameterSetName, RegistryObjectParameterSet))
+                {
+                    ResourceGroupName = Registry.ResourceGroupName;
+                    RegistryName = Registry.Name;
+                }               
+
+                RegistryClient.DeleteReplication(ResourceGroupName, RegistryName, Name);
+            }
+        }
     }
 }

@@ -6,6 +6,8 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.ContainerRegistry.Models;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation;
@@ -15,52 +17,94 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
     [Cmdlet(VerbsCommon.Get, ContainerRegistryReplicationNoun,
         DefaultParameterSetName = NameResourceGroupParameterSet,
         SupportsShouldProcess = true), OutputType(typeof(PSContainerRegistryReplication))]
+    [OutputType(typeof(IList<PSContainerRegistryReplication>))]
     public class GetAzureContainerRegistryReplication : ContainerRegistryCmdletBase
     {
         [Parameter(
             Position = 0,
             Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Resource Group Name.")]
+            ParameterSetName = ShowReplicationByNameResourceGroupParameterSet,
+            HelpMessage = "Container Registry Replication Name.")]
+        [Parameter(ParameterSetName = ShowReplicationByRegistryObjectParameterSet)]
         [ValidateNotNullOrEmpty]
-        public string ResourceGroupName { get; set; }
+        [Alias(ReplicationNameAlias)]
+        public string Name { get; set; }
 
         [Parameter(
             Position = 1,
             Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
+            ParameterSetName = ShowReplicationByNameResourceGroupParameterSet,
+            HelpMessage = "Resource Group Name.")]
+        [Parameter(ParameterSetName = ListReplicationByNameResourceGroupParameterSet)]
+        [ValidateNotNullOrEmpty]
+        public string ResourceGroupName { get; set; }
+
+        [Parameter(
+            Position = 2,
+            Mandatory = true,
+            ParameterSetName = ShowReplicationByNameResourceGroupParameterSet,
             HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Parameter(ParameterSetName = ListReplicationByNameResourceGroupParameterSet)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
         [Parameter(
             Mandatory = true,
-            ParameterSetName = RegistryObjectParameterSet,
+            ParameterSetName = ShowReplicationByRegistryObjectParameterSet,
             ValueFromPipeline = true,
             HelpMessage = "Container Registry Object.")]
+        [Parameter(ParameterSetName = ListReplicationByRegistryObjectParameterSet)]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
-
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Container Registry Replication Name.")]
-        [ValidateNotNullOrEmpty]
-        [Alias(ReplicationNameAlias)]
-        public string Name { get; set; }
         
         public override void ExecuteCmdlet()
         {
-            if (!string.IsNullOrEmpty(Name))
+            if(string.Equals(ParameterSetName, ShowReplicationByRegistryObjectParameterSet) || 
+                string.Equals(ParameterSetName, ListReplicationByRegistryObjectParameterSet))
             {
-                WriteObject(new PSContainerRegistryReplication());
+                ResourceGroupName = Registry.ResourceGroupName;
+                RegistryName = Registry.Name;
             }
-            else
-            {
-                var replications = new List<PSContainerRegistryReplication>();
 
-                WriteObject(replications);
+            switch (ParameterSetName)
+            {
+                case ShowReplicationByRegistryObjectParameterSet:
+                case ShowReplicationByNameResourceGroupParameterSet:
+                    ShowReplication();
+                    break;
+                case ListReplicationByNameResourceGroupParameterSet:
+                case ListReplicationByRegistryObjectParameterSet:
+                    ListReplication();
+                    break;
             }
+        }
+
+        private void ListReplication()
+        {
+            var replications = RegistryClient.ListReplications(ResourceGroupName, RegistryName);
+            var replicationList = new List<PSContainerRegistryReplication>();
+            foreach(var r in replications)
+            {
+                replicationList.Add(new PSContainerRegistryReplication(r));
+            }
+
+            while (!string.IsNullOrEmpty(replications.NextPageLink))
+            {
+                replications = RegistryClient.ListReplicationsUsingNextLink(replications.NextPageLink);
+                foreach (var r in replications)
+                {
+                    replicationList.Add(new PSContainerRegistryReplication(r));
+                }
+            }
+
+            WriteObject(replicationList, true);
+        }
+
+        private void ShowReplication()
+        {
+            var replication = RegistryClient.GetReplication(ResourceGroupName, RegistryName, Name);
+            WriteObject(new PSContainerRegistryReplication(replication));
         }
     }
 }

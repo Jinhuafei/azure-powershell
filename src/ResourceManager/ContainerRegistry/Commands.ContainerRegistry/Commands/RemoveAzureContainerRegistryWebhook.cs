@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry.Commands
             Mandatory = true,
             ParameterSetName = NameResourceGroupParameterSet,
             HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -56,5 +56,18 @@ namespace Microsoft.Azure.Commands.ContainerRegistry.Commands
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
 
+        public override void ExecuteCmdlet()
+        {
+            if (ShouldProcess(Name, "Delete the Webhook from the container registry"))
+            {
+                if (string.Equals(ParameterSetName, RegistryObjectParameterSet))
+                {
+                    ResourceGroupName = Registry.ResourceGroupName;
+                    RegistryName = Registry.Name;
+                }
+
+                RegistryClient.DeleteWebhook(ResourceGroupName, RegistryName, Name);
+            }
+        }
     }
 }

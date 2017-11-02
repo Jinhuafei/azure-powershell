@@ -13,10 +13,38 @@
 // ----------------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerRegistry.Models;
+using System.Collections.Generic;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
     public class PSContainerRegistryWebhook
     {
+        public PSContainerRegistryWebhook(Webhook webhook)
+        {
+            Name = webhook?.Name;
+            Type = webhook?.Type;
+            Tags = webhook?.Tags;
+            Location = webhook?.Location;
+            Status = webhook?.Status;
+            Scope = webhook?.Scope;
+            Actions = webhook?.Actions;
+            ProvisioningState = webhook?.ProvisioningState;
+        }
+
+        public string Name { get; set; }
+
+        public string Type { get; set; }
+
+        public IDictionary<string, string> Tags { get; set; }
+
+        public string Location { get; set; }
+
+        public string Status { get; set; }
+
+        public string Scope { get; set; }
+
+        public IList<string> Actions { get; set; }
+
+        public string ProvisioningState { get; }
     }
 }

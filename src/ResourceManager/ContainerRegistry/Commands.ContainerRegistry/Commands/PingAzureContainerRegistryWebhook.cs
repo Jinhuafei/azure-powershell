@@ -12,14 +12,14 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System;
-using System.Collections;
 using System.Management.Automation;
+using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsDiagnostic.Test, ContainerRegistryWebhookNoun, DefaultParameterSetName = NameResourceGroupParameterSet)]
-    public class TestAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
+    [Cmdlet(VerbsDiagnostic.Ping, ContainerRegistryWebhookNoun, DefaultParameterSetName = NameResourceGroupParameterSet)]
+    [OutputType(typeof(EventInfo))]
+    public class PingAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
         [Parameter(
             Position = 0,
@@ -42,7 +42,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             Mandatory = true,
             ParameterSetName = NameResourceGroupParameterSet,
             HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -56,7 +56,13 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 
         public override void ExecuteCmdlet()
         {
-            
+            if (string.Equals(ParameterSetName, RegistryObjectParameterSet))
+            {
+                ResourceGroupName = Registry.ResourceGroupName;
+                RegistryName = Registry.Name;
+            }
+            var eventInfo = RegistryClient.PingWebhook(ResourceGroupName, RegistryName, Name);
+            WriteObject(eventInfo);
         }
     }
 }

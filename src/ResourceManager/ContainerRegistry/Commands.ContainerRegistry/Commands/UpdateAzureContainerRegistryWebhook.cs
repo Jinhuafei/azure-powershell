@@ -12,6 +12,8 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using Microsoft.Azure.Commands.ResourceManager.Common.Tags;
+using Microsoft.Azure.Management.ContainerRegistry.Models;
 using System;
 using System.Collections;
 using System.Management.Automation;
@@ -32,7 +34,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string ResourceGroupName { get; set; }
 
         [Parameter(Position = 2, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
-        [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
+        [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
@@ -42,6 +44,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 
         [Parameter(Mandatory = false, HelpMessage = "Space separated list of actions that trigger the webhook to post notifications.")]
         [Alias(WebhookActionsAlias)]
+        [ValidateSet(WebhookAction.Delete, WebhookAction.Push)]
         public string[] Actions { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
@@ -57,5 +60,42 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNull]
         [Alias(WebhookTagsAlias)]
         public Hashtable Tag { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Webhook is disabled")]
+        [Alias(WebhookDisabledAlias)]
+        public SwitchParameter Disabled { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Webhook scope.")]
+        [ValidateNotNull]
+        [Alias(WebhookScopeAlias)]
+        public string Scope { get; set; }
+
+        public override void ExecuteCmdlet()
+        {
+            if (string.Equals(ParameterSetName, RegistryObjectParameterSet))
+            {
+                ResourceGroupName = Registry.ResourceGroupName;
+                RegistryName = Registry.Name;
+            }
+            var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
+            var headers = ConversionUtilities.ToDictionary(Headers);
+
+            var parameters = new WebhookUpdateParameters()
+            {
+                Actions = Actions,
+                CustomHeaders = headers,
+                ServiceUri = Uri?.ToString(),
+                Tags = tags,
+                Status = ConversionUtilities.ToWebhookStatus(Disabled),
+                Scope = Scope
+            };
+            
+            var webhook = RegistryClient.UpdateWebhook(ResourceGroupName, RegistryName, Name, parameters);
+            WriteObject(new PSContainerRegistryWebhook(webhook));
+        }
     }
 }

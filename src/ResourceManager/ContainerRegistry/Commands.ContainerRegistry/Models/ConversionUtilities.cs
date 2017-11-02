@@ -13,31 +13,34 @@
 // ----------------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerRegistry.Models;
-using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    public class PSContainerRegistryReplication
+    static class ConversionUtilities
     {
-        public PSContainerRegistryReplication(Replication replication)
+        public static IDictionary<string, string> ToDictionary(Hashtable ht)
         {
-            Id = replication?.Id;
-            Name = replication?.Name;
-            Location = replication?.Location;
-            Tags = replication?.Tags;
-            ProvisioningState = replication?.ProvisioningState;
-            Type = replication?.Type;
-            Status = replication?.Status;
+            if (ht == null)
+            {
+                return null;
+            }
+            else
+            {
+                var dictionary = new Dictionary<string, string>();
+                foreach (var entry in ht.Cast<DictionaryEntry>())
+                {
+                    dictionary[(string)entry.Key] = entry.Value?.ToString();
+                }
+                return dictionary;
+            }
         }
 
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Location { get; set; }
-        public string Type { get; set; }
-        public IDictionary<string, string> Tags { get; set; }
-        public DateTime? CreationDate { get; set; }
-        public string ProvisioningState { get; set; }
-        public Status Status { get; set; }
+        public static string ToWebhookStatus(bool disabled)
+        {
+            return disabled ? WebhookStatus.Disabled : WebhookStatus.Enabled;
+        }
     }
 }

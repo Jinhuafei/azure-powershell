@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             CreationDate = registry?.CreationDate;
             ProvisioningState = registry?.ProvisioningState;
             AdminUserEnabled = registry?.AdminUserEnabled;
-            StorageAccountName = registry?.StorageAccount?.Name;
+            StorageAccountId = registry?.StorageAccount?.Id;
         }
 
         public string Id { get; set; }
@@ -47,9 +47,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string SkuTier { get; set; }
         public string LoginServer { get; set; }
         public DateTime? CreationDate { get; set; }
-        public ProvisioningState? ProvisioningState { get; set; }
+        public string ProvisioningState { get; set; }
         public bool? AdminUserEnabled { get; set; }
-        public string StorageAccountName { get; set; }
+        public string StorageAccountId { get; set; }
 
         public static string ParseResourceGroupFromId(string idFromServer)
         {
