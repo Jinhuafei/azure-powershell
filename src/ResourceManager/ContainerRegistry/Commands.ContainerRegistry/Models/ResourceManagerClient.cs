@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using Microsoft.Rest.Azure.OData;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
-using Microsoft.Azure.Commands.Common.Authentication.Models;
 using Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkClient;
 using Microsoft.Azure.Commands.Common.Authentication.Abstractions;
 using Microsoft.Azure.Management.ContainerRegistry.Models;
@@ -50,14 +49,12 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 storageAccountName += DateTime.UtcNow.ToString("hhmmss");
 
                 template = DeploymentTemplateHelper.DeploymentTemplateNewStorage(
-                    registryName, location, SkuTier.Basic, storageAccountName, adminUserEnabled);
+                    registryName, location, SkuTier.Classic, storageAccountName, adminUserEnabled);
             }
             else
             {
-                var storageAccountResourceGroup = GetStorageAccountResourceGroup(storageAccountName);
-
                 template = DeploymentTemplateHelper.DeploymentTemplateExistingStorage(
-                    registryName, location, SkuTier.Basic, storageAccountName, storageAccountResourceGroup, adminUserEnabled);
+                    registryName, location, SkuTier.Classic, storageAccountName, adminUserEnabled);
             }
 
             var deploymentName = $"ContainerRegistry_{registryName}";

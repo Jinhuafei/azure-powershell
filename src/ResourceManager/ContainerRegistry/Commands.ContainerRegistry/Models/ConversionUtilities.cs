@@ -12,7 +12,6 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.ContainerRegistry.Models;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,11 +35,6 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 }
                 return dictionary;
             }
-        }
-
-        public static string ToWebhookStatus(bool disabled)
-        {
-            return disabled ? WebhookStatus.Disabled : WebhookStatus.Enabled;
         }
     }
 }

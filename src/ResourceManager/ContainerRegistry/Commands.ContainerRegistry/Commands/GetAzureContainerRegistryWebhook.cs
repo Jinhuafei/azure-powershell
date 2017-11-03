@@ -18,39 +18,39 @@ using System.Management.Automation;
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
     [Cmdlet(VerbsCommon.Get, ContainerRegistryWebhookNoun, DefaultParameterSetName = ListWebhookByNameResourceGroupParameterSet)]
-    [OutputType(typeof(PSContainerRegistryWebhook), typeof(PSContainerRegistryWebhookConfig), typeof(PSContainerRegistryWebhookEvent),
-        typeof(IList<PSContainerRegistryWebhook>), typeof(IList<PSContainerRegistryWebhookEvent>))]
+    [OutputType(typeof(PSContainerRegistryWebhook), typeof(PSContainerRegistryWebhookConfig), typeof(PSContainerRegistryWebhookEvent))]
+    [OutputType(typeof(IList<PSContainerRegistryWebhook>), typeof(IList<PSContainerRegistryWebhookEvent>))]
     public class GetAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
         [Parameter(Position = 0, Mandatory = true, ParameterSetName = ShowWebhookByNameResourceGroupParameterSet, HelpMessage = "Webhook Name.")]
-        [Parameter(ParameterSetName = ShowWebhookByRegistryObjectParameterSet)]
-        [Parameter(ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet)]
-        [Parameter(ParameterSetName = GetWebhookConfigByRegistryObjectParameterSet)]
-        [Parameter(ParameterSetName = ListWebhookEventsByNameResourceGroupParameterSet)]
-        [Parameter(ParameterSetName = ListWebhookEventsByRegistryObjectParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ShowWebhookByRegistryObjectParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByRegistryObjectParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ListWebhookEventsByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ListWebhookEventsByRegistryObjectParameterSet)]
         [ValidateNotNullOrEmpty]
         [Alias(WebhookNameAlias)]
         public string Name { get; set; }
 
         [Parameter(Position = 1, Mandatory = true, ParameterSetName = ListWebhookByNameResourceGroupParameterSet, HelpMessage = "Resource Group Name.")]
-        [Parameter(ParameterSetName = ShowWebhookByNameResourceGroupParameterSet)]
-        [Parameter(ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet)]
-        [Parameter(ParameterSetName = ListWebhookEventsByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ShowWebhookByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ListWebhookEventsByNameResourceGroupParameterSet)]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
         [Parameter(Position = 2, Mandatory = true, ParameterSetName = ListWebhookByNameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
-        [Parameter(ParameterSetName = ShowWebhookByNameResourceGroupParameterSet)]
-        [Parameter(ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet)]
-        [Parameter(ParameterSetName = ListWebhookEventsByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ShowWebhookByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByNameResourceGroupParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ListWebhookEventsByNameResourceGroupParameterSet)]
         [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = ListWebhookByRegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
-        [Parameter(ParameterSetName = ShowWebhookByRegistryObjectParameterSet)]
-        [Parameter(ParameterSetName = GetWebhookConfigByRegistryObjectParameterSet)]
-        [Parameter(ParameterSetName = ListWebhookEventsByRegistryObjectParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ShowWebhookByRegistryObjectParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByRegistryObjectParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ListWebhookEventsByRegistryObjectParameterSet)]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
 

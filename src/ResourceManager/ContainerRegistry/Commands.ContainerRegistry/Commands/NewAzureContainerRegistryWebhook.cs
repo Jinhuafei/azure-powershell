@@ -20,89 +20,58 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsCommon.New, ContainerRegistryWebhookNoun,
-        DefaultParameterSetName = NameResourceGroupParameterSet,
-        SupportsShouldProcess = true), OutputType(typeof(PSContainerRegistryWebhook))]
+    [Cmdlet(VerbsCommon.New, ContainerRegistryWebhookNoun, DefaultParameterSetName = NameResourceGroupParameterSet, SupportsShouldProcess = true)]
+    [OutputType(typeof(PSContainerRegistryWebhook))]
     public class NewAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
-        [Parameter(
-            Position = 0,
-            Mandatory = true,
-            HelpMessage = "Webhook Name.")]
+        [Parameter(Position = 0, Mandatory = true, HelpMessage = "Webhook Name.")]
         [ValidateNotNullOrEmpty]
         [Alias(WebhookNameAlias)]
         public string Name { get; set; }
 
-        [Parameter(
-            Position = 1,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
-        [Parameter(
-            Position = 2,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 2, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
         [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
-        [Parameter(
-            Position = 3,
-            Mandatory = true,
-            HelpMessage = "The service URI for the webhook to post notifications.")]
+        [Parameter(Position = 3, Mandatory = true, HelpMessage = "The service URI for the webhook to post notifications.")]
         [Alias(WebhookUriAlias)]
         public Uri Uri { get; set; }
 
-        [Parameter(
-            Position = 4,
-            Mandatory = true,
-            HelpMessage = "Space separated list of actions that trigger the webhook to post notifications.")]
+        [Parameter(Position = 4, Mandatory = true, HelpMessage = "Space separated list of actions that trigger the webhook to post notifications.")]
         [Alias(WebhookActionsAlias)]
         [ValidateSet(WebhookAction.Delete, WebhookAction.Push)]
         public string[] Actions { get; set; }
 
-        [Parameter(
-            Mandatory = true,
-            ParameterSetName = RegistryObjectParameterSet,
-            ValueFromPipeline = true,
-            HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Custom headers that will be added to the webhook notifications.")]
+        [Parameter(Mandatory = false, HelpMessage = "Custom headers that will be added to the webhook notifications.")]
         [ValidateNotNull]
         [Alias(WebhookHeadersAlias)]
         public Hashtable Headers { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Webhook tags.")]
+        [Parameter(Mandatory = false, HelpMessage = "Webhook tags.")]
         [ValidateNotNull]
         [Alias(WebhookTagsAlias)]
         public Hashtable Tag { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Webhook is disabled")]
-        [Alias(WebhookDisabledAlias)]
-        public SwitchParameter Disabled { get; set; }
+        [Parameter(Mandatory = false, HelpMessage = "Webhook status")]
+        [Alias(WebhookStatusAlias)]
+        [ValidateSet(WebhookStatus.Enabled, WebhookStatus.Disabled)]
+        public string Status { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Webhook scope.")]
+        [Parameter(Mandatory = false, HelpMessage = "Webhook scope.")]
         [ValidateNotNull]
         [Alias(WebhookScopeAlias)]
         public string Scope { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Webhook Location. Default to the location of the resource group.")]
+        [Parameter(Mandatory = false, HelpMessage = "Webhook Location. Default to the location of the resource group.")]
         [ValidateNotNullOrEmpty]
         [Alias(WebhookLocationAlias)]
         public string Location { get; set; }
@@ -126,7 +95,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                     CustomHeaders = headers,
                     ServiceUri = Uri?.ToString(),
                     Tags = tags,
-                    Status = ConversionUtilities.ToWebhookStatus(Disabled),
+                    Status = Status ?? WebhookStatus.Enabled,
                     Scope = Scope,
                     Location = Location ?? ResourceManagerClient.GetResourceGroupLocation(ResourceGroupName)
                 };

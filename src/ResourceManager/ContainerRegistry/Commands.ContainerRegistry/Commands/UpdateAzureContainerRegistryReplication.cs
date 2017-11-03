@@ -18,47 +18,29 @@ using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsData.Update, ContainerRegistryReplicationNoun,
-        DefaultParameterSetName = NameResourceGroupParameterSet,
-        SupportsShouldProcess = true), OutputType(typeof(PSContainerRegistryReplication))]
+    [Cmdlet(VerbsData.Update, ContainerRegistryReplicationNoun, DefaultParameterSetName = NameResourceGroupParameterSet, SupportsShouldProcess = true)]
+    [OutputType(typeof(PSContainerRegistryReplication))]
     public class UpdateAzureContainerRegistryReplication : ContainerRegistryCmdletBase
     {
-        [Parameter(
-            Position = 0,
-            Mandatory = true,
-            HelpMessage = "Container Registry Replication Name. Default to the location name.")]
+        [Parameter(Position = 0, Mandatory = true, HelpMessage = "Container Registry Replication Name. Default to the location name.")]
         [ValidateNotNullOrEmpty]
         [Alias(ReplicationNameAlias)]
         public string Name { get; set; }
 
-        [Parameter(
-            Position = 1,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
-        [Parameter(
-            Position = 2,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 2, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
         [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
-        [Parameter(
-            Mandatory = true,
-            ParameterSetName = RegistryObjectParameterSet,
-            ValueFromPipeline = true,
-            HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
 
-        [Parameter(
-            Mandatory = true,
-            HelpMessage = "Container Registry Tags.")]
+        [Parameter(Mandatory = true, HelpMessage = "Container Registry Tags.")]
         [ValidateNotNull]
         [Alias(TagsAlias)]
         public Hashtable Tag { get; set; }

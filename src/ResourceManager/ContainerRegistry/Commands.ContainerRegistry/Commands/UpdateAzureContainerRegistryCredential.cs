@@ -17,41 +17,24 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsData.Update, ContainerRegistryCredentialNoun,
-        DefaultParameterSetName = NameResourceGroupParameterSet,
-        SupportsShouldProcess = true),
-        OutputType(typeof(PSContainerRegistryCredential))]
+    [Cmdlet(VerbsData.Update, ContainerRegistryCredentialNoun, DefaultParameterSetName = NameResourceGroupParameterSet, SupportsShouldProcess = true)]
+    [OutputType(typeof(PSContainerRegistryCredential))]
     public class UpdateAzureContainerRegistryCredential : ContainerRegistryCmdletBase
     {
-        [Parameter(
-            Position = 0,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
-        [Parameter(
-            Position = 1,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
         [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string Name { get; set; }
 
-        [Parameter(
-            Mandatory = true,
-            ParameterSetName = RegistryObjectParameterSet,
-            ValueFromPipeline = true,
-            HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
 
-        [Parameter(
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            HelpMessage = "The name of password to regenerate.")]
+        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, HelpMessage = "The name of password to regenerate.")]
         [ValidateNotNullOrEmpty]
         [ValidateSet("password", "password2")]
         public PasswordName PasswordName { get; set; }

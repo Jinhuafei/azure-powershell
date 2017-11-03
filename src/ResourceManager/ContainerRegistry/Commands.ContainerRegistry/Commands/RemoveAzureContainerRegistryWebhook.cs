@@ -12,47 +12,28 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
-using System;
-using System.Collections;
 using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry.Commands
 {
-    [Cmdlet(VerbsCommon.Remove, ContainerRegistryWebhookNoun,
-        DefaultParameterSetName = NameResourceGroupParameterSet,
-        SupportsShouldProcess = true)]
+    [Cmdlet(VerbsCommon.Remove, ContainerRegistryWebhookNoun, DefaultParameterSetName = NameResourceGroupParameterSet, SupportsShouldProcess = true)]
     public class RemoveAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
-        [Parameter(
-            Position = 0,
-            Mandatory = true,
-            HelpMessage = "Webhook Name.")]
+        [Parameter(Position = 0, Mandatory = true, HelpMessage = "Webhook Name.")]
         [ValidateNotNullOrEmpty]
         [Alias(WebhookNameAlias)]
         public string Name { get; set; }
 
-        [Parameter(
-            Position = 1,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
-        [Parameter(
-            Position = 2,
-            Mandatory = true,
-            ParameterSetName = NameResourceGroupParameterSet,
-            HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 2, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
         [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
-        [Parameter(
-            Mandatory = true,
-            ParameterSetName = RegistryObjectParameterSet,
-            ValueFromPipeline = true,
-            HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
         [ValidateNotNullOrEmpty]
         public PSContainerRegistry Registry { get; set; }
 

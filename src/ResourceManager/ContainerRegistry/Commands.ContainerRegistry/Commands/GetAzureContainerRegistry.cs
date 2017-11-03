@@ -18,30 +18,16 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsCommon.Get, ContainerRegistryNoun), OutputType(typeof(PSContainerRegistry))]
+    [Cmdlet(VerbsCommon.Get, ContainerRegistryNoun)]
+    [OutputType(typeof(PSContainerRegistry))]
     public class GetAzureContainerRegistry : ContainerRegistryCmdletBase
     {
-        [Parameter(
-            Position = 0,
-            Mandatory = false,
-            ParameterSetName = ResourceGroupParameterSet,
-            ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Resource Group Name.")]
-        [Parameter(
-            Position = 0,
-            Mandatory = true,
-            ParameterSetName = RegistryNameParameterSet,
-            ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 0, Mandatory = false, ParameterSetName = ResourceGroupParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = RegistryNameParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
-        [Parameter(
-            Position = 1,
-            Mandatory = true,
-            ParameterSetName = RegistryNameParameterSet,
-            ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = RegistryNameParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Container Registry Name.")]
         [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string Name { get; set; }

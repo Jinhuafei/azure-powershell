@@ -61,15 +61,12 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Alias(WebhookTagsAlias)]
         public Hashtable Tag { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Webhook is disabled")]
-        [Alias(WebhookDisabledAlias)]
-        public SwitchParameter Disabled { get; set; }
+        [Parameter(Mandatory = false, HelpMessage = "Webhook status")]
+        [Alias(WebhookStatusAlias)]
+        [ValidateSet(WebhookStatus.Enabled, WebhookStatus.Disabled)]
+        public string Status { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Webhook scope.")]
+        [Parameter(Mandatory = false, HelpMessage = "Webhook scope.")]
         [ValidateNotNull]
         [Alias(WebhookScopeAlias)]
         public string Scope { get; set; }
@@ -90,7 +87,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 CustomHeaders = headers,
                 ServiceUri = Uri?.ToString(),
                 Tags = tags,
-                Status = ConversionUtilities.ToWebhookStatus(Disabled),
+                Status = Status,
                 Scope = Scope
             };
             

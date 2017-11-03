@@ -39,11 +39,6 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             _storageClient = AzureSession.Instance.ClientFactory.CreateArmClient<StorageManagementClient>(context, AzureEnvironment.Endpoint.ResourceManager);
         }
 
-        public string GetStorageAccountAccessKey(string resourceGroupName, string accountName)
-        {
-            return _storageClient.StorageAccounts.ListKeys(resourceGroupName, accountName).Keys[0].Value;
-        }
-
         public Registry CreateRegistry(string resourceGroupName, string registryName, Registry registry)
         {
             return _client.Registries.Create(resourceGroupName, registryName, registry);
@@ -59,7 +54,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             string registryName,
             bool? adminUserEnabled,
             string sku = null,
-            string storageAccountId = null,
+            string storageAccountName = null,
             string storageAccountResourceGroup = null,
             IDictionary<string, string> tags = null)
         {
@@ -71,20 +66,20 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             if(sku != null)
             {
                 parameters.Sku = new Management.ContainerRegistry.Models.Sku(sku);
-            }
+            }            
 
-            if (storageAccountId != null)
+            if (storageAccountName != null)
             {
                 if (storageAccountResourceGroup == null)
                 {
                     throw new ArgumentNullException("Storage account resource group cannot be null.");
                 }
 
-                var storageAccountAccessKey = GetStorageAccountAccessKey(storageAccountResourceGroup, storageAccountId);
+                var storage = _storageClient.StorageAccounts.GetProperties(storageAccountResourceGroup, storageAccountName);
 
                 parameters.StorageAccount = new StorageAccountProperties()
                 {
-                    Id = storageAccountId
+                    Id = storage.Id
                 };
             }
 

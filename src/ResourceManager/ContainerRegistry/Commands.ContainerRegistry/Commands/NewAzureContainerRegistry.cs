@@ -22,59 +22,39 @@ using DeploymentState = Microsoft.Azure.Commands.ResourceManager.Cmdlets.Entitie
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsCommon.New, ContainerRegistryNoun, SupportsShouldProcess = true),
-        OutputType(typeof(PSContainerRegistry))]
+    [Cmdlet(VerbsCommon.New, ContainerRegistryNoun, SupportsShouldProcess = true)]
+    [OutputType(typeof(PSContainerRegistry))]
     public class NewAzureContainerRegistry : ContainerRegistryCmdletBase
     {
-        [Parameter(
-            Position = 0,
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 0, Mandatory = true, ValueFromPipelineByPropertyName = true, HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
-        [Parameter(
-            Position = 1,
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, HelpMessage = "Container Registry Name.")]
         [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string Name { get; set; }
 
-        [Parameter(
-            Position = 2,
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Container Registry SKU.")]
+        [Parameter(Position = 2, Mandatory = true, ValueFromPipelineByPropertyName = true, HelpMessage = "Container Registry SKU.")]
         [Alias(ContainerRegistrySkuAlias, RegistrySkuAlias)]
         [ValidateSet(SkuTier.Classic, SkuTier.Basic, SkuTier.Premium, SkuTier.Standard, IgnoreCase = false)]
         public string Sku { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Container Registry Location. Default to the location of the resource group.")]
+        [Parameter(Mandatory = false, HelpMessage = "Container Registry Location. Default to the location of the resource group.")]
         [ValidateNotNullOrEmpty]
         public string Location { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Enable admin user for the container registry.")]
+        [Parameter(Mandatory = false, HelpMessage = "Enable admin user for the container registry.")]
         [ValidateNotNull]
         [Alias(EnableAdminAlias)]
         public SwitchParameter EnableAdminUser { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Container Registry Tags.")]
+        [Parameter(Mandatory = false, HelpMessage = "Container Registry Tags.")]
         [ValidateNotNull]
         [Alias(TagsAlias)]
         public Hashtable Tag { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "The name of an existing storage account.")]
+        [Parameter(Mandatory = false, HelpMessage = "The name of an existing storage account.")]
         public string StorageAccountName { get; set; }
 
         public override void ExecuteCmdlet()
