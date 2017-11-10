@@ -50,6 +50,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public Hashtable Tag { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "The name of an existing storage account.")]
+        [ValidateNotNullOrEmpty]
         public string StorageAccountName { get; set; }
 
         [Parameter(Position = 2, Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Container Registry SKU.")]
@@ -70,15 +71,15 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                     adminUserEnabled = EnableAdminUser || !DisableAdminUser;
                 }
 
-                string storageAccountResourceGroup = null;
+                string storageAccountId = null;
 
                 if (StorageAccountName != null)
                 {
-                    storageAccountResourceGroup = ResourceManagerClient.GetStorageAccountResourceGroup(StorageAccountName);
+                    storageAccountId = ResourceManagerClient.GetStorageAccountId(StorageAccountName);
                 }
 
                 var registry = RegistryClient.UpdateRegistry(
-                    ResourceGroupName, Name, adminUserEnabled, Sku, StorageAccountName, storageAccountResourceGroup, tags);
+                    ResourceGroupName, Name, adminUserEnabled, Sku, storageAccountId, tags);
                 WriteObject(new PSContainerRegistry(registry));
             }
         }

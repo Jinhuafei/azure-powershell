@@ -54,7 +54,8 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Alias(TagsAlias)]
         public Hashtable Tag { get; set; }
 
-        [Parameter(Mandatory = false, HelpMessage = "The name of an existing storage account.")]
+        [Parameter(Mandatory = false, HelpMessage = "The name of an existing storage account. This only applies to Classic sku.")]
+        [ValidateNotNullOrEmpty]
         public string StorageAccountName { get; set; }
 
         public override void ExecuteCmdlet()
@@ -75,10 +76,10 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                     Location = ResourceManagerClient.GetResourceGroupLocation(ResourceGroupName);
                 }
 
-                if(string.Equals(Sku, SkuTier.Classic))
+                if(string.Equals(Sku, SkuName.Classic) && StorageAccountName == null)
                 {
                     DeploymentExtended result = ResourceManagerClient.CreateClassicRegistry(
-                        ResourceGroupName, Name, Location, EnableAdminUser, StorageAccountName, tags);
+                        ResourceGroupName, Name, Location, EnableAdminUser, tags);
 
                     if (result.Properties.ProvisioningState == DeploymentState.Succeeded.ToString())
                     {
@@ -95,6 +96,12 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                         Tags = tags,
                         Location = Location
                     };
+                    
+                    if (StorageAccountName != null)
+                    {
+                        var storageAccountId = ResourceManagerClient.GetStorageAccountId(StorageAccountName);
+                        registry.StorageAccount = new StorageAccountProperties(storageAccountId);
+                    }
 
                     var createdRegistry = RegistryClient.CreateRegistry(ResourceGroupName, Name, registry);
                     WriteObject(new PSContainerRegistry(createdRegistry));

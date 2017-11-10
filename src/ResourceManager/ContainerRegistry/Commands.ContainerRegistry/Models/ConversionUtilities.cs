@@ -12,6 +12,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,29 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 }
                 return dictionary;
             }
+        }
+
+        public static string ParseResourceGroupFromId(string idFromServer)
+        {
+            if (!string.IsNullOrEmpty(idFromServer))
+            {
+                string[] tokens = idFromServer.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+                return tokens[3];
+            }
+
+            return null;
+        }
+
+        public static string ParseStorageAccountFromId(string storageAccountIdFromServer)
+        {
+            if (!string.IsNullOrEmpty(storageAccountIdFromServer))
+            {
+                var tokens = storageAccountIdFromServer.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+                return tokens[tokens.Length - 1];
+            }
+            return null;
         }
     }
 }

@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 
         [Parameter(Mandatory = false, HelpMessage = "Webhook tags.")]
         [ValidateNotNull]
-        [Alias(WebhookTagsAlias)]
+        [Alias(TagsAlias)]
         public Hashtable Tag { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Webhook status")]
@@ -71,7 +71,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Alias(WebhookScopeAlias)]
         public string Scope { get; set; }
 
-        [Parameter(Mandatory = false, HelpMessage = "Webhook Location. Default to the location of the resource group.")]
+        [Parameter(Mandatory = false, HelpMessage = "Webhook Location. Default to the location of the registry.")]
         [ValidateNotNullOrEmpty]
         [Alias(WebhookLocationAlias)]
         public string Location { get; set; }
@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 
                 var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
                 var headers = ConversionUtilities.ToDictionary(Headers);
-
+                
                 var parameters = new WebhookCreateParameters()
                 {
                     Actions = Actions,
@@ -97,7 +97,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                     Tags = tags,
                     Status = Status ?? WebhookStatus.Enabled,
                     Scope = Scope,
-                    Location = Location ?? ResourceManagerClient.GetResourceGroupLocation(ResourceGroupName)
+                    Location = Location ?? RegistryClient.GetRegistryLocation(ResourceGroupName, RegistryName)
                 };
 
                 var webhook = RegistryClient.CreateWebhook(ResourceGroupName, RegistryName, Name, parameters);

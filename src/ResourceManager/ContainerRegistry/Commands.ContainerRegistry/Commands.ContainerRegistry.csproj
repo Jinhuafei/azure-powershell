@@ -87,9 +87,7 @@
     <Compile Include="Models\ContainerRegistryCmdletBase.cs" />
     <Compile Include="Models\PSContainerRegistryCredential.cs" />
     <Compile Include="Models\PSContainerRegistryReplication.cs" />
-    <Compile Include="Models\PSContainerRegistryUsage.cs" />
     <Compile Include="Models\PSContainerRegistryWebhook.cs" />
-    <Compile Include="Models\PSContainerRegistryWebhookConfig.cs" />
     <Compile Include="Models\PSContainerRegistryWebhookEvent.cs" />
     <Compile Include="Models\ResourceManagerClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -22,24 +22,24 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
     public class GetAzureContainerRegistryReplication : ContainerRegistryCmdletBase
     {
         [Parameter(Position = 0, Mandatory = true, ParameterSetName = ShowReplicationByNameResourceGroupParameterSet, HelpMessage = "Container Registry Replication Name.")]
-        [Parameter(ParameterSetName = ShowReplicationByRegistryObjectParameterSet)]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = ShowReplicationByRegistryObjectParameterSet)]
         [ValidateNotNullOrEmpty]
         [Alias(ReplicationNameAlias)]
         public string Name { get; set; }
 
         [Parameter(Position = 1, Mandatory = true, ParameterSetName = ShowReplicationByNameResourceGroupParameterSet, HelpMessage = "Resource Group Name.")]
-        [Parameter(ParameterSetName = ListReplicationByNameResourceGroupParameterSet)]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = ListReplicationByNameResourceGroupParameterSet)]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
         [Parameter(Position = 2, Mandatory = true, ParameterSetName = ShowReplicationByNameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
-        [Parameter(ParameterSetName = ListReplicationByNameResourceGroupParameterSet)]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = ListReplicationByNameResourceGroupParameterSet)]
         [Alias(ContainerRegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = ShowReplicationByRegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
-        [Parameter(ParameterSetName = ListReplicationByRegistryObjectParameterSet)]
+        [Parameter(Mandatory = true, ParameterSetName = ListReplicationByRegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
         [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
         

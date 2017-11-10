@@ -34,7 +34,6 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         protected const string WebhookActionsAlias = "WebhookActions";
         protected const string WebhookUriAlias = "WebhookUri";
         protected const string WebhookHeadersAlias = "WebhookHeaders";
-        protected const string WebhookTagsAlias = "WebhookTags";
         protected const string WebhookStatusAlias = "WebhookStatus";
         protected const string WebhookScopeAlias = "WebhookScope";
         protected const string WebhookLocationAlias = "WebhookLocation";

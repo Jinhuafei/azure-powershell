@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 
         [Parameter(Mandatory = false, HelpMessage = "Space separated tags in 'key[=value]' format.")]
         [ValidateNotNull]
-        [Alias(WebhookTagsAlias)]
+        [Alias(TagsAlias)]
         public Hashtable Tag { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Webhook status")]

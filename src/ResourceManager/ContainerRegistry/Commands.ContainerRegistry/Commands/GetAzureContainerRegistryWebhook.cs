@@ -12,13 +12,14 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.ContainerRegistry.Models;
 using System.Collections.Generic;
 using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
     [Cmdlet(VerbsCommon.Get, ContainerRegistryWebhookNoun, DefaultParameterSetName = ListWebhookByNameResourceGroupParameterSet)]
-    [OutputType(typeof(PSContainerRegistryWebhook), typeof(PSContainerRegistryWebhookConfig), typeof(PSContainerRegistryWebhookEvent))]
+    [OutputType(typeof(PSContainerRegistryWebhook), typeof(CallbackConfig), typeof(PSContainerRegistryWebhookEvent))]
     [OutputType(typeof(IList<PSContainerRegistryWebhook>), typeof(IList<PSContainerRegistryWebhookEvent>))]
     public class GetAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
@@ -107,7 +108,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         private void GetWebhookConfig()
         {
             var config = RegistryClient.GetWebhookGetCallbackConfig(ResourceGroupName, RegistryName, Name);
-            WriteObject(new PSContainerRegistryWebhookConfig(config));
+            WriteObject(config);
         }
 
         private void ListWebhookEvents()

@@ -157,7 +157,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             string registryName,
             string registryLocation,
             string registrySku,
-            string storageAccountName,
+            string storageAccountId,
             bool? adminUserEnabled,
             IDictionary<string, string> tags = null)
         {
@@ -182,7 +182,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                             AdminUserEnabled = adminUserEnabled != null ? adminUserEnabled.Value : false,
                             StorageAccount = new StorageAccount
                             {
-                                Id = $"[resourceId('Microsoft.Storage/storageAccounts', '{storageAccountName}')]"
+                                Id = $"[resourceId('Microsoft.Storage/storageAccounts', '{storageAccountId}')]"
                             }
                         }
                     }

@@ -57,7 +57,7 @@ function Test-AzureContainerRegistry
 		# Check registry usage
 		$usage = Get-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -ShowUsage
 		Assert-AreEqual "Size" $usage[0].Name
-		Assert-AreEqual "Webhooks" $usage[0].Name
+		Assert-AreEqual "Webhooks" $usage[1].Name
 
 		# Get list of container registries under a resource group
 		$registries = Get-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName
@@ -86,16 +86,16 @@ function Test-AzureContainerRegistry
 		$classicRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $classicRegistryName -Sku "Classic" -StorageAccountName $storageAccountName
 		Verify-ContainerRegistry $classicRegistry $resourceGroupName $classicRegistryName "Classic" $storageAccountName $false
 
-		# Creating a premium sku container registry with an existing storage account, storage account should be ignored
+		# Creating a premium sku container registry with an existing storage account
 		$premiumRegistryName = Get-RandomRegistryName
-		$premiumRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -Sku "Premium" -StorageAccountName $storageAccountName
-		Verify-ContainerRegistry $premiumRegistry $resourceGroupName $premiumRegistryName "Premium" $null $false
+		Assert-Error {New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -Sku "Premium" -StorageAccountName $storageAccountName} "User cannot provide storage account in SKU Premium"
     
 		# update classic sku container registry
 		$updatedClassicRegistry = Update-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $classicRegistryName -EnableAdminUser -StorageAccountName $storageAccountName
 		Verify-ContainerRegistry $updatedClassicRegistry $resourceGroupName $classicRegistryName "Classic" $storageAccountName $true
 	
 		# update premium sku container registry
+		New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -Sku "Premium"
 		Assert-Error {Update-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -EnableAdminUser -StorageAccountName $storageAccountName} "Storage account cannot be updated in SKU Premium"
 
 		Remove-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $classicRegistryName	
@@ -236,12 +236,13 @@ function Test-AzureContainerRegistryReplication
 
 		# Create replication for premium sku
 		$premiumRegistryName = Get-RandomRegistryName
+		$replicationName = Get-RandomReplicationName
 		$premiumRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -Sku "Premium" -Location $location
-		$replication = New-AzureRmContainerRegistryReplication -ResourceGroupName $premiumRegistry.ResourceGroupName -RegistryName $premiumRegistry.Name -Location $replicationLocation  -Tag @{key='val'}
-		Verify-AzureContainerRegistryReplication $replication $replicationLocation @{key='val'}
+		$replication = New-AzureRmContainerRegistryReplication -ResourceGroupName $premiumRegistry.ResourceGroupName -RegistryName $premiumRegistry.Name -Location $replicationLocation -Name $replicationName -Tag @{key='val'}
+		Verify-AzureContainerRegistryReplication $replication $replicationLocation @{key='val'} $replicationName
 		
 		# update replication and compare it with retrieved one
-		$updatedReplication = Update-AzureRmContainerRegistryReplication -ResourceGroupName $premiumRegistry.ResourceGroupName -RegistryName $premiumRegistry.Name -Name $replication.Name -Tag @{key123='123'}
+		$updatedReplication = Update-AzureRmContainerRegistryReplication -ResourceGroupName $premiumRegistry.ResourceGroupName -RegistryName $premiumRegistry.Name -Name $replicationName -Tag @{key123='123'}
 		$retrievedReplication = Get-AzureRmContainerRegistryReplication -Registry $premiumRegistry -Name $replication.Name
 		Verify-AzureContainerRegistryReplication $updatedReplication $retrievedReplication.Location @{key123='123'} $retrievedReplication.Name
 
@@ -249,13 +250,14 @@ function Test-AzureContainerRegistryReplication
 		Verify-AzureContainerRegistryReplication $replication2 $replicationLocation2
 
 		# Get multiple replications from a registry
+		# One replication is automatically created at registry location
 		$replications = Get-AzureRmContainerRegistryReplication -Registry $premiumRegistry
-		Assert-AreEqual 2 $replications.Count
+		Assert-AreEqual 3 $replications.Count
 
 		# Delete one replication
 		Remove-AzureRmContainerRegistryReplication -ResourceGroupName $premiumRegistry.ResourceGroupName -RegistryName $premiumRegistry.Name -Name $replication2.Name
 		$replications = Get-AzureRmContainerRegistryReplication -ResourceGroupName $premiumRegistry.ResourceGroupName -RegistryName $premiumRegistry.Name
-		Assert-AreEqual 1 $replications.Count
+		Assert-AreEqual 2 $replications.Count
 	}
 	finally
 	{
@@ -298,56 +300,59 @@ function Test-AzureContainerRegistryWebhook
 	{
 		$replicationLocation = "centralus"
 		$replicationLocation2 = "westus2"
-		$webhookUri = "http://bing.com"
-		$webhookUri2 = "http://microsoft.com"
-		New-AzureRmResourceGroup -Name $resourceGroupName -Location $location
-		$webhookName = Get-RandomRegistryName
+		$webhookUri = "http://bing.com/"
+		$webhookUri2 = "http://microsoft.com/"
+		New-AzureRmResourceGroup -Name $resourceGroupName -Location $location		
 
 		# Classic sku doesn't support webhook
 		$classicRegistryName = Get-RandomRegistryName
+		$webhookName = Get-RandomWebhookName
 		$classicRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $classicRegistryName -Sku "Classic" -Location $location
 		Assert-Error {New-AzureRmContainerRegistryWebhook -Registry $classicRegistry -Location $location -Name $webhookName -Actions "push","delete" -Uri $webhookUri} "The resource type webhooks is not supported for the registry"
 
 		# Create webhook for basic sku
 		$basicRegistryName = Get-RandomRegistryName
-		$basicRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $basicRegistryName -Sku "Basic" -Location $location
-		$webhook = New-AzureRmContainerRegistryWebhook -Registry $basicRegistry -Name $webhookName -Actions "push","delete" -Uri $webhookUri
-		Verify-AzureContainerRegistryWebhook $webhook $webhookName $location "push","delete"
+		$webhookName = Get-RandomWebhookName
+		$basicRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $basicRegistryName -Sku "Basic" -Location $replicationLocation
+		$webhook = New-AzureRmContainerRegistryWebhook -Registry $basicRegistry -Name $webhookName -Actions "push","delete" -Uri $webhookUri -Location $replicationLocation
+		Verify-AzureContainerRegistryWebhook $webhook $webhookName $replicationLocation "push","delete"
 
-		# Standard sku doesn't support webhook
+		# Create webhook for standard sku
 		$standardRegistryName = Get-RandomRegistryName
-		$standardRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $standardRegistryName -Sku "Standard" -Location $location
-		$webhook = New-AzureRmContainerRegistryWebhook -Registry $standardRegistry -Location $location -Name $webhookName -Actions "push","delete" -Uri $webhookUri
-		Verify-AzureContainerRegistryWebhook $webhook $webhookName $location "push","delete"
+		$webhookName = Get-RandomWebhookName
+		$standardRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $standardRegistryName -Sku "Standard" -Location $replicationLocation
+		$webhook = New-AzureRmContainerRegistryWebhook -Registry $standardRegistry -Name $webhookName -Actions "push","delete" -Uri $webhookUri
+		Verify-AzureContainerRegistryWebhook $webhook $webhookName $replicationLocation "push","delete"
 
 		# Create webhook for premium sku
-		$premiumRegistryName = Get-RandomRegistryName		
-		$premiumRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -Sku "Premium" -Location $location
+		$premiumRegistryName = Get-RandomRegistryName
+		$webhookName = Get-RandomWebhookName
+		$premiumRegistry = New-AzureRmContainerRegistry -ResourceGroupName $resourceGroupName -Name $premiumRegistryName -Sku "Premium" -Location $replicationLocation
 		$webhook = New-AzureRmContainerRegistryWebhook -Registry $premiumRegistry -Name $webhookName -Actions "push","delete" -Uri $webhookUri -Tag @{key='val'} -Scope "foo:*"
-		Verify-AzureContainerRegistryWebhook $webhook $webhookName $location "push","delete" "key=val" "enabled" "foo:*"
+		Verify-AzureContainerRegistryWebhook $webhook $webhookName $replicationLocation "push","delete" @{key='val'} "enabled" "foo:*"
 
 		# Create another one for same location
-		$webhookName2 = Get-RandomRegistryName
+		$webhookName2 = Get-RandomWebhookName
 		$webhook2 = New-AzureRmContainerRegistryWebhook  -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName2 -Actions "push" -Uri $webhookUri -Status "Disabled"
-		Verify-AzureContainerRegistryWebhook $webhook2 $webhookName2 $location "push" "" "disabled"
+		Verify-AzureContainerRegistryWebhook $webhook2 $webhookName2 $replicationLocation "push" $null "disabled"
 		$webhookConfig = Get-AzureRmContainerRegistryWebhook  -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName2 -GetConfig
 		Assert-AreEqual $webhookUri $webhookConfig.ServiceUri
 
 		# Update existing webhook
 		$updatedWebhook = Update-AzureRmContainerRegistryWebhook -Registry $premiumRegistry  -Name $webhookName2 -Actions "push","delete" -Uri $webhookUri2 -Status "Enabled" -Tag @{key='val'} -Scope "foo:*" -Headers @{customheader="abc";testheader="123"}
-		Verify-AzureContainerRegistryWebhook $updatedWebhook $webhookName2 $location "push","delete" "key=val" "enabled" "foo:*"
+		Verify-AzureContainerRegistryWebhook $updatedWebhook $webhookName2 $replicationLocation "push","delete" @{key='val'} "enabled" "foo:*"
 		$webhookConfig2 = Get-AzureRmContainerRegistryWebhook  -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName2 -GetConfig
 		Assert-AreEqual $webhookUri2 $webhookConfig2.ServiceUri
 		Verify-Dictionary @{customheader="abc";testheader="123"} $webhookConfig2.CustomHeaders
 
 		# Fail to create webhook on location which doesn't have replication
-		$webhookName3 = Get-RandomRegistryName
-		Assert-Error {New-AzureRmContainerRegistryWebhook  -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3 -Actions "push" -Uri $webhookUri -Location $replicationLocation} "The registry resource $($premiumRegistryName) could not be found"
+		$webhookName3 = Get-RandomWebhookName
+		Assert-Error {New-AzureRmContainerRegistryWebhook  -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3 -Actions "push" -Uri $webhookUri -Location $replicationLocation2} "The registry resource $($premiumRegistryName) could not be found"
 
 		# Create replication on a new location and create webhook
-		New-AzureRmContainerRegistryReplication -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Location $replicationLocation
-		$webhook3 = New-AzureRmContainerRegistryWebhook -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3 -Actions "push" -Uri $webhookUri -Location $replicationLocation
-		Verify-AzureContainerRegistryWebhook $webhook3 $webhookName3 $replicationLocation "push"
+		New-AzureRmContainerRegistryReplication -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Location $replicationLocation2
+		$webhook3 = New-AzureRmContainerRegistryWebhook -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3 -Actions "push" -Uri $webhookUri -Location $replicationLocation2
+		Verify-AzureContainerRegistryWebhook $webhook3 $webhookName3 $replicationLocation2 "push"
 
 		# Get list of webhooks
 		$webhooks = Get-AzureRmContainerRegistryWebhook -Registry $premiumRegistry -List
@@ -357,15 +362,15 @@ function Test-AzureContainerRegistryWebhook
 		Ping-AzureRmContainerRegistryWebhook -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3
 		Ping-AzureRmContainerRegistryWebhook -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3		
 		$pingEvents = Get-AzureRmContainerRegistryWebhook  -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3 -ListEvents
-		Assert-AreEqual 2 $pingEvents
+		Assert-AreEqual 2 $pingEvents.Count
 
 		$pingEvents = Get-AzureRmContainerRegistryWebhook  -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName2 -ListEvents
-		Assert-AreEqual 0 $pingEvents
+		Assert-AreEqual 0 $pingEvents.Count
 
 
 		# Delete Webhook
-		Remove-AzureRmContainerRegistryWebhook -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName1
 		Remove-AzureRmContainerRegistryWebhook -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName2
+		Remove-AzureRmContainerRegistryWebhook -ResourceGroupName $resourceGroupName -RegistryName $premiumRegistryName -Name $webhookName3
 		$webhooks = Get-AzureRmContainerRegistryWebhook -Registry $premiumRegistry -List
 		Assert-AreEqual 1 $webhooks.Count
 	}
@@ -377,21 +382,21 @@ function Test-AzureContainerRegistryWebhook
 
 function Verify-AzureContainerRegistryWebhook
 {
-	param([Microsoft.Azure.Commands.ContainerRegistry.PSContainerRegistryWebhook] $webhook, [string] $name, [string] $location, [Array] $actions, [string] $tags = "", [string] $status="enabled", [string] $scope = "")
+	param([Microsoft.Azure.Commands.ContainerRegistry.PSContainerRegistryWebhook] $webhook, [string] $name, [string] $location, [Array] $actions, [Hashtable] $tags = $null, [string] $status="enabled", [string] $scope = "")
 
 	Assert-NotNull $webhook
-	Assert-AreEqual $webhook.Name $name
-	Assert-AreEqual $webhook.Type "Microsoft.ContainerRegistry/registries/webhooks"
-	Assert-AreEqual $webhook.Location $location
-	Assert-AreEqual $webhook.Status $status
-	Assert-AreEqual $webhook.ProvisioningState "Succeeded"
-	Assert-AreEqualArray $webhook.Actions $actions
+	Assert-AreEqual $name $webhook.Name
+	Assert-AreEqual "Microsoft.ContainerRegistry/registries/webhooks" $webhook.Type
+	Assert-AreEqual $location $webhook.Location
+	Assert-AreEqual $status $webhook.Status
+	Assert-AreEqual "Succeeded" $webhook.ProvisioningState
+	Assert-AreEqualArray $actions $webhook.Actions
 	if($scope)
 	{
-		Assert-AreEqual $webhook.Scope $scope
+		Assert-AreEqual $scope $webhook.Scope
 	}
 	if($tags)
 	{
-		Verify-Dictionary $webhook.Tags $tags
+		Verify-Dictionary $tags $webhook.Tags
 	}
 }

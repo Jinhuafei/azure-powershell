@@ -54,8 +54,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             string registryName,
             bool? adminUserEnabled,
             string sku = null,
-            string storageAccountName = null,
-            string storageAccountResourceGroup = null,
+            string storageAccountId = null,
             IDictionary<string, string> tags = null)
         {
             var parameters = new RegistryUpdateParameters()
@@ -68,18 +67,11 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 parameters.Sku = new Management.ContainerRegistry.Models.Sku(sku);
             }            
 
-            if (storageAccountName != null)
+            if (storageAccountId != null)
             {
-                if (storageAccountResourceGroup == null)
-                {
-                    throw new ArgumentNullException("Storage account resource group cannot be null.");
-                }
-
-                var storage = _storageClient.StorageAccounts.GetProperties(storageAccountResourceGroup, storageAccountName);
-
                 parameters.StorageAccount = new StorageAccountProperties()
                 {
-                    Id = storage.Id
+                    Id = storageAccountId
                 };
             }
 
@@ -118,6 +110,12 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             {
                 return _client.Registries.ListByResourceGroupNext(nextPageLink: nextLink);
             }
+        }
+
+        public string GetRegistryLocation(string resourceGroupName, string registryName)
+        {
+            var registry = GetRegistry(resourceGroupName, registryName);
+            return registry?.Location;
         }
 
         public RegistryListCredentialsResult ListRegistryCredentials(string resourceGroupName, string registryName)

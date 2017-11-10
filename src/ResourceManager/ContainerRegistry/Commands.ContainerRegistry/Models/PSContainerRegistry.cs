@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public PSContainerRegistry(Registry registry)
         {
             Id = registry?.Id;
-            ResourceGroupName = ParseResourceGroupFromId(Id);
+            ResourceGroupName = ConversionUtilities.ParseResourceGroupFromId(Id);
             Name = registry?.Name;
             Type = registry?.Type;
             Location = registry?.Location;
@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             CreationDate = registry?.CreationDate;
             ProvisioningState = registry?.ProvisioningState;
             AdminUserEnabled = registry?.AdminUserEnabled;
-            StorageAccountName = ParseStorageAccountFromId(registry?.StorageAccount?.Id);
+            StorageAccountName = ConversionUtilities.ParseStorageAccountFromId(registry?.StorageAccount?.Id);
         }
 
         public string Id { get; set; }
@@ -50,28 +50,5 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string ProvisioningState { get; set; }
         public bool? AdminUserEnabled { get; set; }
         public string StorageAccountName { get; set; }
-
-        public static string ParseResourceGroupFromId(string idFromServer)
-        {
-            if (!string.IsNullOrEmpty(idFromServer))
-            {
-                string[] tokens = idFromServer.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-
-                return tokens[3];
-            }
-
-            return null;
-        }
-
-        public static string ParseStorageAccountFromId(string storageAccountIdFromServer)
-        {
-            if(!string.IsNullOrEmpty(storageAccountIdFromServer))
-            {
-                var tokens = storageAccountIdFromServer.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-
-                return tokens[tokens.Length - 1];
-            }
-            return null;
-        }
     }
 }

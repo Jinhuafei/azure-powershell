@@ -19,7 +19,7 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
     [Cmdlet(VerbsCommon.Get, ContainerRegistryNoun)]
-    [OutputType(typeof(PSContainerRegistry), typeof(IList<PSContainerRegistry>))]
+    [OutputType(typeof(PSContainerRegistry), typeof(IList<PSContainerRegistry>), typeof(IList<RegistryUsage>))]
     public class GetAzureContainerRegistry : ContainerRegistryCmdletBase
     {
         [Parameter(Position = 0, Mandatory = false, ParameterSetName = ResourceGroupParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Resource Group Name.")]
@@ -32,8 +32,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNullOrEmpty]
         public string Name { get; set; }
 
-        [Parameter(Position = 1, Mandatory = false, ParameterSetName = RegistryNameParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Show the usage of the container registry")]
-
+        [Parameter(Mandatory = false, ParameterSetName = RegistryNameParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Show the usage of the container registry")]
         public SwitchParameter ShowUsage { get; set; }
 
         public override void ExecuteCmdlet()
@@ -47,18 +46,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 }
                 else
                 {
-                    var usages = RegistryClient.ListRegistryUsage(ResourceGroupName, Name);
-                    var usageList = new List<PSContainerRegistryUsage>();
+                    var usages = RegistryClient.ListRegistryUsage(ResourceGroupName, Name);                    
 
-                    if(usages.Value != null)
-                    {
-                        foreach (var u in usages.Value)
-                        {
-                            usageList.Add(new PSContainerRegistryUsage(u));
-                        }
-                    }
-
-                    WriteObject(usageList);
+                    WriteObject(usages.Value);
                 }
             }
             else
