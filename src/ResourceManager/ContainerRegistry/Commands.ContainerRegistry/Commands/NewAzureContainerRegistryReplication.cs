@@ -32,10 +32,10 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string RegistryName { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
-        [ValidateNotNullOrEmpty]
+        [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
 
-        [Parameter(Mandatory = false, HelpMessage = "Container Registry Location. Default to the location of the resource group.")]
+        [Parameter(Mandatory = true, HelpMessage = "Container Registry Location. Default to the location of the resource group.")]
         [ValidateNotNullOrEmpty]
         [Alias(ReplicationLocationAlias)]
         public string Location { get; set; }
@@ -60,6 +60,10 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                     RegistryName = Registry.Name;
                 }
                 var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
+                if (string.IsNullOrEmpty(Name))
+                {
+                    Name = Location.Replace(" ", string.Empty).ToLower();
+                }
 
                 var replication = RegistryClient.CreateReplication(ResourceGroupName, RegistryName, Name, Location, tags);
                 WriteObject(new PSContainerRegistryReplication(replication));

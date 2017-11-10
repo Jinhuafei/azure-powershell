@@ -58,3 +58,31 @@ function Get-ProviderLocation($provider)
 
 	return "West US"
 }
+
+function Assert-Error
+{
+	param([ScriptBlock] $script, [string] $message)
+
+	$originalErrorCount = $error.Count
+	$originalErrorActionPreference = $ErrorActionPreference
+	$ErrorActionPreference = "SilentlyContinue"
+	try
+	{
+		&$script
+	}
+	finally
+	{
+		$ErrorActionPreference = $originalErrorActionPreference
+	}
+
+	$result = $Error[0] -like "*$($message)*"
+
+	If(!$result)
+	{
+		 Write-Output "expected error $($message), actual error $($Error[0])"
+	}
+
+	Assert-True {$result}
+
+	$Error.Clear()
+}

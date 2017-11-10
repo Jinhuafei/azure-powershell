@@ -48,7 +48,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string[] Actions { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
-        [ValidateNotNullOrEmpty]
+        [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Custom headers that will be added to the webhook notifications.")]

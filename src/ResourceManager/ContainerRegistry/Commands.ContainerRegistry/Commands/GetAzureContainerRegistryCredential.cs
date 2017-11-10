@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string Name { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
-        [ValidateNotNullOrEmpty]
+        [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
 
         public override void ExecuteCmdlet()

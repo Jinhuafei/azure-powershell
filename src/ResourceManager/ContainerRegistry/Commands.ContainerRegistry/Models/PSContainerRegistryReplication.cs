@@ -28,7 +28,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             Tags = replication?.Tags;
             ProvisioningState = replication?.ProvisioningState;
             Type = replication?.Type;
-            Status = replication?.Status;
+            Status = replication?.Status?.DisplayStatus;
+            StatusMessage = replication?.Status?.Message;
+            StatusTimestamp = replication?.Status?.Timestamp;
         }
 
         public string Id { get; set; }
@@ -36,8 +38,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public string Location { get; set; }
         public string Type { get; set; }
         public IDictionary<string, string> Tags { get; set; }
-        public DateTime? CreationDate { get; set; }
-        public string ProvisioningState { get; set; }
-        public Status Status { get; set; }
+        public string ProvisioningState { get; set; }        
+        public string Status { get; }        
+        public string StatusMessage { get; }        
+        public DateTime? StatusTimestamp { get; }
     }
 }

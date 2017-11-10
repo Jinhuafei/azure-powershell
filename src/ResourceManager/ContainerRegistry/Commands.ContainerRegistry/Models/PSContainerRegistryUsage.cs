@@ -13,40 +13,23 @@
 // ----------------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerRegistry.Models;
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    public class PSContainerRegistryWebhook
+    public class PSContainerRegistryUsage
     {
-        public PSContainerRegistryWebhook(Webhook webhook)
+        public PSContainerRegistryUsage(RegistryUsage usage)
         {
-            Id = webhook?.Id;
-            Name = webhook?.Name;
-            Type = webhook?.Type;
-            Tags = webhook?.Tags;
-            Location = webhook?.Location;
-            Status = webhook?.Status;
-            Scope = webhook?.Scope;
-            Actions = webhook?.Actions;
-            ProvisioningState = webhook?.ProvisioningState;
+            Name = usage?.Name;
+            Limit = usage?.Limit;
+            CurrentValue = usage?.CurrentValue;
+            Unit = usage?.Unit;
         }
-        public string Id { get; set; }
-
-        public string Name { get; set; }
-
-        public string Type { get; set; }
-
-        public IDictionary<string, string> Tags { get; set; }
-
-        public string Location { get; set; }
-
-        public string Status { get; set; }
-
-        public string Scope { get; set; }
-
-        public IList<string> Actions { get; set; }
-
-        public string ProvisioningState { get; }
+        public string Name { get; set; }        
+        public long? Limit { get; set; }
+        public long? CurrentValue { get; set; }
+        public string Unit { get; set; }
     }
 }

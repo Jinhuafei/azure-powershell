@@ -125,6 +125,11 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             return _client.Registries.ListCredentials(resourceGroupName, registryName);
         }
 
+        public RegistryUsageListResult ListRegistryUsage(string resourceGroupName, string registryName)
+        {
+            return _client.Registries.ListUsages(resourceGroupName, registryName);
+        }
+
         public RegistryListCredentialsResult RegenerateRegistryCredential(string resourceGroupName, string registryName, PasswordName passwordName)
         {
             return _client.Registries.RegenerateCredential(resourceGroupName, registryName, passwordName);

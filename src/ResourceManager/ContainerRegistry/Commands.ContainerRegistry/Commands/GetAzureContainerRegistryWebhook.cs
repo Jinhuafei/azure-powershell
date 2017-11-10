@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Parameter(Mandatory = true, ParameterSetName = ShowWebhookByRegistryObjectParameterSet)]
         [Parameter(Mandatory = true, ParameterSetName = GetWebhookConfigByRegistryObjectParameterSet)]
         [Parameter(Mandatory = true, ParameterSetName = ListWebhookEventsByRegistryObjectParameterSet)]
-        [ValidateNotNullOrEmpty]
+        [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = ListWebhookByNameResourceGroupParameterSet, HelpMessage = "List all of the webhooks for a container registry.")]

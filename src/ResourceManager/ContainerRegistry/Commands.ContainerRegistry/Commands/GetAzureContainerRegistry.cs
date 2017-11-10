@@ -19,7 +19,7 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
     [Cmdlet(VerbsCommon.Get, ContainerRegistryNoun)]
-    [OutputType(typeof(PSContainerRegistry))]
+    [OutputType(typeof(PSContainerRegistry), typeof(IList<PSContainerRegistry>))]
     public class GetAzureContainerRegistry : ContainerRegistryCmdletBase
     {
         [Parameter(Position = 0, Mandatory = false, ParameterSetName = ResourceGroupParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Resource Group Name.")]
@@ -32,12 +32,34 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNullOrEmpty]
         public string Name { get; set; }
 
+        [Parameter(Position = 1, Mandatory = false, ParameterSetName = RegistryNameParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "Show the usage of the container registry")]
+
+        public SwitchParameter ShowUsage { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (!string.IsNullOrEmpty(ResourceGroupName) && !string.IsNullOrEmpty(Name))
             {
-                var registry = RegistryClient.GetRegistry(ResourceGroupName, Name);
-                WriteObject(new PSContainerRegistry(registry));
+                if(!ShowUsage)
+                {
+                    var registry = RegistryClient.GetRegistry(ResourceGroupName, Name);
+                    WriteObject(new PSContainerRegistry(registry));
+                }
+                else
+                {
+                    var usages = RegistryClient.ListRegistryUsage(ResourceGroupName, Name);
+                    var usageList = new List<PSContainerRegistryUsage>();
+
+                    if(usages.Value != null)
+                    {
+                        foreach (var u in usages.Value)
+                        {
+                            usageList.Add(new PSContainerRegistryUsage(u));
+                        }
+                    }
+
+                    WriteObject(usageList);
+                }
             }
             else
             {

@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             CreationDate = registry?.CreationDate;
             ProvisioningState = registry?.ProvisioningState;
             AdminUserEnabled = registry?.AdminUserEnabled;
-            StorageAccountId = registry?.StorageAccount?.Id;
+            StorageAccountName = ParseStorageAccountFromId(registry?.StorageAccount?.Id);
         }
 
         public string Id { get; set; }
@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public DateTime? CreationDate { get; set; }
         public string ProvisioningState { get; set; }
         public bool? AdminUserEnabled { get; set; }
-        public string StorageAccountId { get; set; }
+        public string StorageAccountName { get; set; }
 
         public static string ParseResourceGroupFromId(string idFromServer)
         {
@@ -60,6 +60,17 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 return tokens[3];
             }
 
+            return null;
+        }
+
+        public static string ParseStorageAccountFromId(string storageAccountIdFromServer)
+        {
+            if(!string.IsNullOrEmpty(storageAccountIdFromServer))
+            {
+                var tokens = storageAccountIdFromServer.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+                return tokens[tokens.Length - 1];
+            }
             return null;
         }
     }
