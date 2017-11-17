@@ -20,11 +20,11 @@ using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsData.Update, ContainerRegistryWebhookNoun, DefaultParameterSetName = NameResourceGroupParameterSet)]
-    [OutputType(typeof(PSContainerRegistry))]
+    [Cmdlet(VerbsData.Update, ContainerRegistryWebhookNoun, DefaultParameterSetName = ResourceIdParameterSet)]
+    [OutputType(typeof(PSContainerRegistryWebhook))]
     public class UpdateAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
-        [Parameter(Position = 0, Mandatory = true, HelpMessage = "Webhook Name.")]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Webhook Name.")]
         [ValidateNotNullOrEmpty]
         [Alias(WebhookNameAlias)]
         public string Name { get; set; }
@@ -47,9 +47,9 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateSet(WebhookAction.Delete, WebhookAction.Push)]
         public string[] Actions { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = WebhookObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Webhook Object.")]
         [ValidateNotNull]
-        public PSContainerRegistry Registry { get; set; }
+        public PSContainerRegistryWebhook Webhook { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Space separated custom headers in 'key[=value]' format that will be added to the webhook notifications.")]
         [ValidateNotNull]
@@ -71,13 +71,32 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Alias(WebhookScopeAlias)]
         public string Scope { get; set; }
 
+        [Parameter(Mandatory = true, ParameterSetName = ResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry Webhook resource id")]
+        [ValidateNotNullOrEmpty]
+        [Alias(ResourceIdAlias)]
+        public string ResourceId { get; set; }
+
         public override void ExecuteCmdlet()
         {
-            if (string.Equals(ParameterSetName, RegistryObjectParameterSet))
+            if (string.Equals(ParameterSetName, WebhookObjectParameterSet))
             {
-                ResourceGroupName = Registry.ResourceGroupName;
-                RegistryName = Registry.Name;
+                ResourceId = Webhook.Id;
             }
+            if (MyInvocation.BoundParameters.ContainsKey("ResourceId") || !string.IsNullOrWhiteSpace(ResourceId))
+            {
+                string resourceGroup, registryName, childResourceName;
+                if(!ConversionUtilities.TryParseRegistryRelatedResourceId(ResourceId, out resourceGroup, out registryName, out childResourceName)
+                    || string.IsNullOrEmpty(childResourceName))
+                {
+                    WriteInvalidResourceIdError(InvalidWebhookResourceIdErrorMessage);
+                    return;
+                }
+
+                ResourceGroupName = resourceGroup;
+                Name = childResourceName;
+                RegistryName = registryName;
+            }
+
             var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
             var headers = ConversionUtilities.ToDictionary(Headers);
 

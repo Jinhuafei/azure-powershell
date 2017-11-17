@@ -18,7 +18,7 @@ using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsCommon.New, ContainerRegistryReplicationNoun, DefaultParameterSetName = NameResourceGroupParameterSet, SupportsShouldProcess = true)]
+    [Cmdlet(VerbsCommon.New, ContainerRegistryReplicationNoun, SupportsShouldProcess = true)]
     [OutputType(typeof(PSContainerRegistryReplication))]
     public class NewAzureContainerRegistryReplication : ContainerRegistryCmdletBase
     {
@@ -31,7 +31,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, HelpMessage = "Container Registry Object.")]
         [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
 
@@ -50,6 +50,11 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [Alias(TagsAlias)]
         public Hashtable Tag { get; set; }
 
+        [Parameter(Mandatory = true, ParameterSetName = ResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry resource id")]
+        [ValidateNotNullOrEmpty]
+        [Alias(ResourceIdAlias)]
+        public string ResourceId { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (ShouldProcess(Name, "Create a replication for the container registry"))
@@ -59,6 +64,19 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                     ResourceGroupName = Registry.ResourceGroupName;
                     RegistryName = Registry.Name;
                 }
+                else if (MyInvocation.BoundParameters.ContainsKey("ResourceId") || !string.IsNullOrWhiteSpace(ResourceId))
+                {
+                    string resourceGroup, registryName, childResourceName;
+                    if(!ConversionUtilities.TryParseRegistryRelatedResourceId(ResourceId, out resourceGroup, out registryName, out childResourceName))
+                    {
+                        WriteInvalidResourceIdError(InvalidRegistryResourceIdErrorMessage);
+                        return;
+                    }
+
+                    ResourceGroupName = resourceGroup;
+                    RegistryName = registryName;
+                }
+
                 var tags = TagsConversionHelper.CreateTagDictionary(Tag, validate: true);
                 if (string.IsNullOrEmpty(Name))
                 {

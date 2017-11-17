@@ -12,6 +12,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using Microsoft.Azure.Commands.ResourceManager.Cmdlets.Components;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,6 +22,11 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
 {
     static class ConversionUtilities
     {
+        private readonly static string StorageResourceTypeName = "Microsoft.Storage/storageAccounts";
+        private readonly static string RegistryResourceTypeName = "Microsoft.ContainerRegistry/registries";
+        private readonly static string RegistryReplicationResourceTypeName = "Microsoft.ContainerRegistry/registries/replications";
+        private readonly static string RegistryWebhookResourceTypeName = "Microsoft.ContainerRegistry/registries/webhooks";
+
         public static IDictionary<string, string> ToDictionary(Hashtable ht)
         {
             if (ht == null)
@@ -42,11 +48,10 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         {
             if (!string.IsNullOrEmpty(idFromServer))
             {
-                string[] tokens = idFromServer.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                var resourceIdentifier = new ResourceIdentifier(idFromServer);                
 
-                return tokens[3];
+                return resourceIdentifier.ResourceGroupName;
             }
-
             return null;
         }
 
@@ -54,11 +59,41 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         {
             if (!string.IsNullOrEmpty(storageAccountIdFromServer))
             {
-                var tokens = storageAccountIdFromServer.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-
-                return tokens[tokens.Length - 1];
+                var resourceIdentifier = new ResourceIdentifier(storageAccountIdFromServer);
+                if(string.Equals(resourceIdentifier.ResourceType, StorageResourceTypeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return resourceIdentifier.ResourceName;
+                }
             }
             return null;
+        }
+
+        public static bool TryParseRegistryRelatedResourceId(string idFromServer, out string resourceGroupName, out string registryName, out string childResourceName)
+        {
+            resourceGroupName = string.Empty;
+            registryName = string.Empty;
+            childResourceName = string.Empty;
+            var parsed = false;
+
+            if (!string.IsNullOrEmpty(idFromServer))
+            {
+                var resourceIdentifier = new ResourceIdentifier(idFromServer);
+                resourceGroupName = resourceIdentifier.ResourceGroupName;
+
+                if (string.Equals(resourceIdentifier.ResourceType, RegistryResourceTypeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    registryName = resourceIdentifier.ResourceName;
+                    parsed = true;
+                }
+                else if(string.Equals(resourceIdentifier.ResourceType, RegistryReplicationResourceTypeName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(resourceIdentifier.ResourceType, RegistryWebhookResourceTypeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    childResourceName = resourceIdentifier.ResourceName;
+                    registryName = resourceIdentifier.ParentResource.Split(new char[] { '/'})[1];
+                    parsed = true;
+                }
+            }
+            return parsed;
         }
     }
 }

@@ -16,7 +16,7 @@ using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsCommon.Get, ContainerRegistryCredentialNoun, DefaultParameterSetName = NameResourceGroupParameterSet)]
+    [Cmdlet(VerbsCommon.Get, ContainerRegistryCredentialNoun)]
     [OutputType(typeof(PSContainerRegistryCredential))]
     public class GetAzureContainerRegistryCredential : ContainerRegistryCmdletBase
     {
@@ -29,9 +29,14 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNullOrEmpty]
         public string Name { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, HelpMessage = "Container Registry Object.")]
         [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = ResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry resource id")]
+        [ValidateNotNullOrEmpty]
+        [Alias(ResourceIdAlias)]
+        public string ResourceId { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -39,6 +44,18 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             {
                 ResourceGroupName = Registry.ResourceGroupName;
                 Name = Registry.Name;
+            }
+            else if (MyInvocation.BoundParameters.ContainsKey("ResourceId") || !string.IsNullOrWhiteSpace(ResourceId))
+            {
+                string resourceGroup, registryName, childResourceName;
+                if(!ConversionUtilities.TryParseRegistryRelatedResourceId(ResourceId, out resourceGroup, out registryName, out childResourceName))
+                {
+                    WriteInvalidResourceIdError(InvalidRegistryResourceIdErrorMessage);
+                    return;
+                }
+
+                ResourceGroupName = resourceGroup;
+                Name = registryName;
             }
 
             var credentials = RegistryClient.ListRegistryCredentials(ResourceGroupName, Name);

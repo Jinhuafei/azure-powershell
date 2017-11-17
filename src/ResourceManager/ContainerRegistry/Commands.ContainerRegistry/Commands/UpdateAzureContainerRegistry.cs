@@ -19,27 +19,31 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsData.Update, ContainerRegistryNoun, DefaultParameterSetName = "Empty", SupportsShouldProcess = true)]
+    [Cmdlet(VerbsData.Update, ContainerRegistryNoun, SupportsShouldProcess = true)]
     [OutputType(typeof(PSContainerRegistry))]
     public class UpdateAzureContainerRegistry : ContainerRegistryCmdletBase
     {
-        [Parameter(Position = 0, Mandatory = true, ValueFromPipelineByPropertyName = true, HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = EnableAdminUserByResourceNameParameterSet, HelpMessage = "Resource Group Name.")]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = DisableAdminUserByResourceNameParameterSet, HelpMessage = "Resource Group Name.")]
         [ValidateNotNullOrEmpty]
         public string ResourceGroupName { get; set; }
 
-        [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = EnableAdminUserByResourceNameParameterSet, HelpMessage = "Container Registry Name.")]
+        [Parameter(Position = 1, Mandatory = true, ParameterSetName = DisableAdminUserByResourceNameParameterSet, HelpMessage = "Container Registry Name.")]
         [Alias(ContainerRegistryNameAlias, RegistryNameAlias, ResourceNameAlias)]
         [ValidateNotNullOrEmpty]
         public string Name { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = EnableAdminUserParameterSet, HelpMessage = "Enable admin user for the container registry.")]
-        [Parameter(Mandatory = false, ParameterSetName = DisableAdminUserParameterSet, HelpMessage = "Disable admin user for the container registry.")]
+        [Parameter(Mandatory = true, ParameterSetName = EnableAdminUserByResourceNameParameterSet, HelpMessage = "Enable admin user for the container registry.")]
+        [Parameter(Mandatory = true, ParameterSetName = EnableAdminUserByResourceIdParameterSet, HelpMessage = "Enable admin user for the container registry.")]
         [ValidateNotNull]
         [Alias(EnableAdminAlias)]
         public SwitchParameter EnableAdminUser { get; set; }
 
-        [Parameter(Mandatory = false, ParameterSetName = EnableAdminUserParameterSet, HelpMessage = "Enable admin user for the container registry.")]
-        [Parameter(Mandatory = true, ParameterSetName = DisableAdminUserParameterSet, HelpMessage = "Disable admin user for the container registry.")]
+        [Parameter(Mandatory = true, ParameterSetName = DisableAdminUserByResourceNameParameterSet, HelpMessage = "Disable admin user for the container registry.")]
+        [Parameter(Mandatory = true, ParameterSetName = DisableAdminUserByResourceIdParameterSet, HelpMessage = "Disable admin user for the container registry.")]
         [ValidateNotNull]
         [Alias(DisableAdminAlias)]
         public SwitchParameter DisableAdminUser { get; set; }
@@ -53,10 +57,17 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNullOrEmpty]
         public string StorageAccountName { get; set; }
 
-        [Parameter(Position = 2, Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Container Registry SKU.")]
+        [Parameter(Position = 2, Mandatory = false, HelpMessage = "Container Registry SKU.")]
         [Alias(ContainerRegistrySkuAlias, RegistrySkuAlias)]
         [ValidateSet(SkuTier.Classic, SkuTier.Basic, SkuTier.Premium, SkuTier.Standard, IgnoreCase = false)]
         public string Sku { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = ResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry resource id")]
+        [Parameter(Mandatory = true, ParameterSetName = DisableAdminUserByResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry resource id")]
+        [Parameter(Mandatory = true, ParameterSetName = EnableAdminUserByResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry resource id")]
+        [ValidateNotNullOrEmpty]
+        [Alias(ResourceIdAlias)]
+        public string ResourceId { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -76,6 +87,19 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
                 if (StorageAccountName != null)
                 {
                     storageAccountId = ResourceManagerClient.GetStorageAccountId(StorageAccountName);
+                }
+
+                if (MyInvocation.BoundParameters.ContainsKey("ResourceId") || !string.IsNullOrWhiteSpace(ResourceId))
+                {
+                    string resourceGroup, registryName, childResourceName;
+                    if(!ConversionUtilities.TryParseRegistryRelatedResourceId(ResourceId, out resourceGroup, out registryName, out childResourceName))
+                    {
+                        WriteInvalidResourceIdError(InvalidRegistryResourceIdErrorMessage);
+                        return;
+                    }
+
+                    ResourceGroupName = resourceGroup;
+                    Name = registryName;
                 }
 
                 var registry = RegistryClient.UpdateRegistry(

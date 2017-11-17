@@ -64,6 +64,7 @@
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\GetAzureContainerRegistryWebhookEvent.cs" />
     <Compile Include="Commands\UpdateAzureContainerRegistryWebhook.cs" />
     <Compile Include="Commands\GetAzureContainerRegistry.cs" />
     <Compile Include="Commands\GetAzureContainerRegistryReplication.cs" />
@@ -74,12 +75,11 @@
     <Compile Include="Commands\RemoveAzureContainerRegistryWebhook.cs" />
     <Compile Include="Commands\TestAzureContainerRegistryNameAvailability.cs" />
     <Compile Include="Commands\GetAzureContainerRegistryCredential.cs" />
-    <Compile Include="Commands\PingAzureContainerRegistryWebhook.cs" />
+    <Compile Include="Commands\TestAzureContainerRegistryWebhook.cs" />
     <Compile Include="Commands\UpdateAzureContainerRegistry.cs" />
     <Compile Include="Commands\RemoveAzureContainerRegistry.cs" />
     <Compile Include="Commands\NewAzureContainerRegistry.cs" />
     <Compile Include="Commands\UpdateAzureContainerRegistryCredential.cs" />
-    <Compile Include="Commands\UpdateAzureContainerRegistryReplication.cs" />
     <Compile Include="Models\ConversionUtilities.cs" />
     <Compile Include="Models\DeploymentTemplate.cs" />
     <Compile Include="Models\PSContainerRegistry.cs" />

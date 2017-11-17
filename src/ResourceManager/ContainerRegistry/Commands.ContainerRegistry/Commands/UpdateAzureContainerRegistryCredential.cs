@@ -17,7 +17,7 @@ using Microsoft.Azure.Management.ContainerRegistry.Models;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsData.Update, ContainerRegistryCredentialNoun, DefaultParameterSetName = NameResourceGroupParameterSet, SupportsShouldProcess = true)]
+    [Cmdlet(VerbsData.Update, ContainerRegistryCredentialNoun, SupportsShouldProcess = true)]
     [OutputType(typeof(PSContainerRegistryCredential))]
     public class UpdateAzureContainerRegistryCredential : ContainerRegistryCmdletBase
     {
@@ -34,10 +34,15 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNull]
         public PSContainerRegistry Registry { get; set; }
 
-        [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, HelpMessage = "The name of password to regenerate.")]
+        [Parameter(Mandatory = true, HelpMessage = "The name of password to regenerate.")]
         [ValidateNotNullOrEmpty]
         [ValidateSet("password", "password2")]
         public PasswordName PasswordName { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = ResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry resource id")]
+        [ValidateNotNullOrEmpty]
+        [Alias(ResourceIdAlias)]
+        public string ResourceId { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -45,6 +50,18 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             {
                 ResourceGroupName = Registry.ResourceGroupName;
                 Name = Registry.Name;
+            }
+            else if (MyInvocation.BoundParameters.ContainsKey("ResourceId") || !string.IsNullOrWhiteSpace(ResourceId))
+            {
+                string resourceGroup, registryName, childResourceName;
+                if(!ConversionUtilities.TryParseRegistryRelatedResourceId(ResourceId, out resourceGroup, out registryName, out childResourceName))
+                {
+                    WriteInvalidResourceIdError(InvalidRegistryResourceIdErrorMessage);
+                    return;
+                }
+
+                ResourceGroupName = resourceGroup;
+                Name = registryName;
             }
 
             if (ShouldProcess(Name, string.Format("Update Container Registry Credential '{0}'", PasswordName)))

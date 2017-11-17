@@ -26,9 +26,7 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         }
 
         public string Id { get; set; }
-
         public EventRequestMessage EventRequestMessage { get; set; }
-
         public EventResponseMessage EventResponseMessage { get; set; }
     }
 }

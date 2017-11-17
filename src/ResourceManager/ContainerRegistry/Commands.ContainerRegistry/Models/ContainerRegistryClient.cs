@@ -112,6 +112,28 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             }
         }
 
+        public IList<PSContainerRegistry> ListAllRegistries(string resourceGroupName)
+        {
+            List<PSContainerRegistry> list = new List<PSContainerRegistry>();
+
+            var registries = ListRegistries(resourceGroupName);
+            foreach (Registry registry in registries)
+            {
+                list.Add(new PSContainerRegistry(registry));
+            }
+
+            while (!string.IsNullOrEmpty(registries.NextPageLink))
+            {
+                registries = ListRegistriesUsingNextLink(resourceGroupName, registries.NextPageLink);
+                foreach (Registry registry in registries)
+                {
+                    var psRegistry = new PSContainerRegistry(registry);
+                    list.Add(psRegistry);
+                }
+            }
+            return list;
+        }
+
         public string GetRegistryLocation(string resourceGroupName, string registryName)
         {
             var registry = GetRegistry(resourceGroupName, registryName);
@@ -156,6 +178,26 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public IPage<Replication> ListReplications(string resourceGroupName, string registryName)
         {
             return _client.Replications.List(resourceGroupName, registryName);
+        }
+
+        public IList<PSContainerRegistryReplication> ListAllReplications(string resourceGroupName, string registryName)
+        {
+            var replications = ListReplications(resourceGroupName, registryName);
+            var replicationList = new List<PSContainerRegistryReplication>();
+            foreach (var r in replications)
+            {
+                replicationList.Add(new PSContainerRegistryReplication(r));
+            }
+
+            while (!string.IsNullOrEmpty(replications.NextPageLink))
+            {
+                replications = ListReplicationsUsingNextLink(replications.NextPageLink);
+                foreach (var r in replications)
+                {
+                    replicationList.Add(new PSContainerRegistryReplication(r));
+                }
+            }
+            return replicationList;
         }
 
         public IPage<Replication> ListReplicationsUsingNextLink(string nextLink)
@@ -206,6 +248,49 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         public IPage<EventModel> ListWebhookEvents(string resourceGroupName, string registryName, string webhookName)
         {
             return _client.Webhooks.ListEvents(resourceGroupName, registryName, webhookName);
+        }
+
+        public IList<PSContainerRegistryWebhook> ListAllWebhook(string resourceGroupName, string registryName)
+        {
+            var webhooks = ListWebhooks(resourceGroupName, registryName);
+            var webhookList = new List<PSContainerRegistryWebhook>();
+
+            foreach (var webhook in webhooks)
+            {
+                webhookList.Add(new PSContainerRegistryWebhook(webhook));
+            }
+
+            while (!string.IsNullOrEmpty(webhooks.NextPageLink))
+            {
+                webhooks = ListWebhooksUsingNextLink(webhooks.NextPageLink);
+
+                foreach (var webhook in webhooks)
+                {
+                    webhookList.Add(new PSContainerRegistryWebhook(webhook));
+                }
+            }
+            return webhookList;
+        }
+
+        public IList<PSContainerRegistryWebhookEvent> ListAllWebhookEvent(string resourceGroupName, string registryName, string webhookName)
+        {
+            var webhookEvents = ListWebhookEvents(resourceGroupName, registryName, webhookName);
+            var webhookEventList = new List<PSContainerRegistryWebhookEvent>();
+
+            foreach (var webhookEvent in webhookEvents)
+            {
+                webhookEventList.Add(new PSContainerRegistryWebhookEvent(webhookEvent));
+            }
+
+            while (!string.IsNullOrEmpty(webhookEvents.NextPageLink))
+            {
+                webhookEvents = ListWebhookEventsUsingNextLink(webhookEvents.NextPageLink);
+                foreach (var webhookEvent in webhookEvents)
+                {
+                    webhookEventList.Add(new PSContainerRegistryWebhookEvent(webhookEvent));
+                }
+            }
+            return webhookEventList;
         }
 
         public IPage<EventModel> ListWebhookEventsUsingNextLink(string nextLink)

@@ -16,10 +16,10 @@ using System.Management.Automation;
 
 namespace Microsoft.Azure.Commands.ContainerRegistry
 {
-    [Cmdlet(VerbsCommon.Remove, ContainerRegistryWebhookNoun, DefaultParameterSetName = NameResourceGroupParameterSet, SupportsShouldProcess = true)]
+    [Cmdlet(VerbsCommon.Remove, ContainerRegistryWebhookNoun, SupportsShouldProcess = true)]
     public class RemoveAzureContainerRegistryWebhook : ContainerRegistryCmdletBase
     {
-        [Parameter(Position = 0, Mandatory = true, HelpMessage = "Webhook Name.")]
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = NameResourceGroupParameterSet, HelpMessage = "Webhook Name.")]
         [ValidateNotNullOrEmpty]
         [Alias(WebhookNameAlias)]
         public string Name { get; set; }
@@ -33,18 +33,36 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
         [ValidateNotNullOrEmpty]
         public string RegistryName { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = RegistryObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
+        [Parameter(Mandatory = true, ParameterSetName = WebhookObjectParameterSet, ValueFromPipeline = true, HelpMessage = "Container Registry Object.")]
         [ValidateNotNull]
-        public PSContainerRegistry Registry { get; set; }
+        public PSContainerRegistryWebhook Webhook { get; set; }
+
+        [Parameter(Mandatory = true, ParameterSetName = ResourceIdParameterSet, ValueFromPipelineByPropertyName = true, HelpMessage = "The container registry Webhook resource id")]
+        [ValidateNotNullOrEmpty]
+        [Alias(ResourceIdAlias)]
+        public string ResourceId { get; set; }
 
         public override void ExecuteCmdlet()
         {
             if (ShouldProcess(Name, "Delete the Webhook from the container registry"))
             {
-                if (string.Equals(ParameterSetName, RegistryObjectParameterSet))
+                if (string.Equals(ParameterSetName, WebhookObjectParameterSet))
                 {
-                    ResourceGroupName = Registry.ResourceGroupName;
-                    RegistryName = Registry.Name;
+                    ResourceId = Webhook.Id;
+                }
+                if (MyInvocation.BoundParameters.ContainsKey("ResourceId") || !string.IsNullOrWhiteSpace(ResourceId))
+                {
+                    string resourceGroup, registryName, childResourceName;
+                    if(!ConversionUtilities.TryParseRegistryRelatedResourceId(ResourceId, out resourceGroup, out registryName, out childResourceName)
+                        || string.IsNullOrEmpty(childResourceName))
+                    {
+                        WriteInvalidResourceIdError(InvalidWebhookResourceIdErrorMessage);
+                        return;
+                    }
+
+                    ResourceGroupName = resourceGroup;
+                    Name = childResourceName;
+                    RegistryName = registryName;
                 }
 
                 RegistryClient.DeleteWebhook(ResourceGroupName, RegistryName, Name);

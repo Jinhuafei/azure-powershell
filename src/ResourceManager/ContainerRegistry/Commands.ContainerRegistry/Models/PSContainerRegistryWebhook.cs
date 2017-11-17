@@ -32,21 +32,15 @@ namespace Microsoft.Azure.Commands.ContainerRegistry
             ProvisioningState = webhook?.ProvisioningState;
         }
         public string Id { get; set; }
-
         public string Name { get; set; }
-
         public string Type { get; set; }
-
         public IDictionary<string, string> Tags { get; set; }
-
         public string Location { get; set; }
-
         public string Status { get; set; }
-
         public string Scope { get; set; }
-
         public IList<string> Actions { get; set; }
+        public string ProvisioningState { get; set;}
+        public CallbackConfig Config { get; set; }
 
-        public string ProvisioningState { get; }
     }
 }
